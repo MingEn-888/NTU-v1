@@ -1,0 +1,17 @@
+{
+  "name": "@intent-router/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "ethers": "^6.11.1",
+    "hardhat": "^2.22.2",
+    "typescript": "^5.4.5"
+  }
+}

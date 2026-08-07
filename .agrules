@@ -1,0 +1,7 @@
+# AGENT RULES & CONSTRAINTS
+
+- Strictly follow TypeScript Strict Mode. No `any` types.
+- Never write pseudocode or leave `// TODO` placeholders. Generate complete, runnable files.
+- Build strictly ONE feature at a time and wait for explicitly requested phase sign-off.
+- Prioritize simplicity, hackathon-demo viability, and clean code over over-engineering.
+- Maintain a dark-mode, glassmorphism fintech aesthetic (Stripe/Linear/Vercel hybrid).

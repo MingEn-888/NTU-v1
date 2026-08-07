@@ -1,0 +1,26 @@
+{
+  "name": "intent-agentic-payment-router",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Intent-Based Agentic Payment Router Hackathon MVP Monorepo",
+  "workspaces": [
+    "shared",
+    "frontend",
+    "backend",
+    "contracts"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -c \"cyan,magenta,yellow\" \"npm run dev:shared\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:shared": "npm --prefix shared run build:watch",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:contracts": "npm --prefix contracts run node",
+    "build": "npm --prefix shared run build && npm --prefix backend run build && npm --prefix frontend run build && npm --prefix contracts run compile",
+    "compile:contracts": "npm --prefix contracts run compile",
+    "test": "npm --prefix shared run test && npm --prefix backend run test && npm --prefix contracts run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}
