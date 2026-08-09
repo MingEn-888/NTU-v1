@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Bot,
@@ -13,7 +14,8 @@ import {
   Zap,
   CheckCircle,
   XCircle,
-  ExternalLink
+  ExternalLink,
+  MessageSquareText
 } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
 import { useTreasury } from "@/hooks/useTreasury";
@@ -119,6 +121,19 @@ export default function Home() {
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
             Express your payment goals in natural language or structured parameters. Our multi-agent solvers evaluate DEX liquidity, gas costs, and bridge latencies to construct optimal execution routes in milliseconds.
           </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Link
+              href="/operations"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-white text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
+            >
+              <MessageSquareText className="h-4 w-4" />
+              Open AI Payment Operations
+            </Link>
+            <span className="text-[11px] text-gray-500 font-medium">
+              Describe a payment · Get a plan · Approve & execute
+            </span>
+          </div>
         </div>
       </div>
 

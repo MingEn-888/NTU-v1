@@ -22,7 +22,7 @@ export const Navbar: React.FC = () => {
               INTENT<span className="text-brand-500">FLOW</span>
             </span>
             <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-500 border border-brand-500/30 rounded-full">
-              v1.0 MVP
+              v1.0
             </span>
           </div>
           <p className="text-xs text-gray-400 font-medium">Agentic Cross-Chain Router</p>
