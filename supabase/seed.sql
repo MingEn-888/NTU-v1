@@ -2,6 +2,8 @@
 -- Purpose: Realistic business payment lifecycle demonstration for IBAP Payment Operations
 -- Scenario: "Pay Alice RM2,500 for invoice INV-1024 by Friday."
 
+BEGIN;
+
 -- 1. AUTH USER & PUBLIC USER (Business Finance Manager)
 INSERT INTO auth.users (
     id,
@@ -126,7 +128,30 @@ INSERT INTO public.intents (
     NOW() - INTERVAL '1 hour 58 minutes'
 ) ON CONFLICT (id) DO NOTHING;
 
--- 6. ROUTE OPTIONS (Populated first to satisfy deferrable FK in payment_plans)
+-- 6. PAYMENT PLAN (Populated before route_options; transaction wrapping allows deferred FK check)
+INSERT INTO public.payment_plans (
+    id,
+    payment_request_id,
+    selected_route_id,
+    total_estimated_gas,
+    estimated_duration,
+    savings,
+    explanation,
+    risk_score,
+    created_at
+) VALUES (
+    'b6000000-0000-0000-0000-000000000001',
+    'b4000000-0000-0000-0000-000000000001',
+    'b7000000-0000-0000-0000-000000000001',
+    0.045000,
+    15,
+    12.50,
+    'Direct Polygon native USDC payment selected. Converts MYR 2,500 to 568.18 USDC. Minimal gas fee ($0.045) and instant settlement (15 seconds).',
+    5.0,
+    NOW() - INTERVAL '1 hour 55 minutes'
+) ON CONFLICT (id) DO NOTHING;
+
+-- 7. ROUTE OPTIONS
 INSERT INTO public.route_options (
     id,
     payment_plan_id,
@@ -167,29 +192,6 @@ INSERT INTO public.route_options (
     72.0,
     0.00,
     FALSE,
-    NOW() - INTERVAL '1 hour 55 minutes'
-) ON CONFLICT (id) DO NOTHING;
-
--- 7. PAYMENT PLAN
-INSERT INTO public.payment_plans (
-    id,
-    payment_request_id,
-    selected_route_id,
-    total_estimated_gas,
-    estimated_duration,
-    savings,
-    explanation,
-    risk_score,
-    created_at
-) VALUES (
-    'b6000000-0000-0000-0000-000000000001',
-    'b4000000-0000-0000-0000-000000000001',
-    'b7000000-0000-0000-0000-000000000001',
-    0.045000,
-    15,
-    12.50,
-    'Direct Polygon native USDC payment selected. Converts MYR 2,500 to 568.18 USDC. Minimal gas fee ($0.045) and instant settlement (15 seconds).',
-    5.0,
     NOW() - INTERVAL '1 hour 55 minutes'
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -382,3 +384,5 @@ INSERT INTO public.audit_logs (
     '{"tx_hash": "0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b", "chain_id": 137}'::jsonb,
     NOW() - INTERVAL '1 hour 14 minutes'
 ) ON CONFLICT (id) DO NOTHING;
+
+COMMIT;
