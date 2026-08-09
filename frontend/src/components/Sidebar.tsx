@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { LayoutDashboard, Send, Route, History, Settings, Bot, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { LayoutDashboard, Send, Route, History, Settings, MessageSquareText } from "lucide-react";
 
 interface NavItem {
   id: string;
@@ -30,6 +31,20 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <nav className="space-y-1.5">
+          {/* Phase 4 — AI Payment Operations (real navigation) */}
+          <Link
+            href="/operations"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-brand-600/25 to-brand-cyan/10 border border-brand-500/40 shadow-glow text-white transition-all duration-150 hover:from-brand-600/40 hover:to-brand-cyan/20"
+          >
+            <div className="flex items-center gap-3">
+              <MessageSquareText className="h-4 w-4 text-brand-cyan" />
+              <span>AI Payments</span>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-500 text-white">
+              Phase 4
+            </span>
+          </Link>
+
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -64,27 +79,6 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Bottom Agent Card */}
-      <div className="p-3.5 rounded-xl glass-card border border-white/10 space-y-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-brand-500/20 text-brand-500">
-            <Bot className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-white">Gemini Intent Agent</div>
-            <div className="text-[11px] text-emerald-400 font-medium">Ready for intents</div>
-          </div>
-        </div>
-        <p className="text-[11px] text-gray-400 leading-relaxed">
-          AI Agent optimizes gas, slippage, and execution paths across chains automatically.
-        </p>
-        <a
-          href="#docs"
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-500 hover:text-brand-100 transition-colors"
-        >
-          View Documentation <ArrowUpRight className="h-3 w-3" />
-        </a>
-      </div>
     </aside>
   );
 };
