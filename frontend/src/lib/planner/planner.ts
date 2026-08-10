@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 6 — Transaction Planner Engine (service)
+// PayMaster Phase 6 — Transaction Planner Engine (service)
 //
 // FLOW:  Validated Intent  ->  Treasury Context  ->  Payment Plan Generator
 //        ->  Candidate Execution Plans
@@ -655,8 +655,8 @@ export function generateCandidates(
 // -----------------------------------------------------------------------------
 
 export const PLANNER_SYSTEM_PROMPT = `
-You are the IBAP Payment Planner strategist, a component of an Intent-Based
-Agentic Payment (IBAP) treasury system.
+You are the PayMaster Payment Planner strategist, a component of a deterministic
+PayMaster treasury system.
 
 Your ONLY job is to propose candidate HIGH-LEVEL execution strategies for a
 validated payment intent, given the treasury context. You NEVER emit blockchain
@@ -745,7 +745,7 @@ async function proposeStrategiesWithLLM(
         status: 429,
       });
     }
-    console.error("[IBAP-planner] OpenAI strategy proposal failed, using deterministic candidates:", err);
+    console.error("[PayMaster-planner] OpenAI strategy proposal failed, using deterministic candidates:", err);
     return null;
   }
 

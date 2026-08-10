@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 5 — Deterministic validation-gate self-test
+// PayMaster Phase 5 — Deterministic validation-gate self-test
 // Runs `finalizeIntent` against simulated LLM outputs (no OpenAI key needed).
 //   cd frontend && npx tsx scripts/intent-selftest.ts
 // =============================================================================

@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 
 /**
  * Markdown renderer for agent messages.
- * Lightweight + safe (no raw HTML), styled to match the IBAP dark glass theme.
+ * Lightweight + safe (no raw HTML), styled to match the PayMaster dark glass theme.
  */
 export function Markdown({ children }: { children: string }) {
   return (

@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 6 — Transaction Planner Engine self-test
+// PayMaster Phase 6 — Transaction Planner Engine self-test
 // Exercises the deterministic planner core (no OpenAI key needed):
 //   - candidate generation for payment / swap / bridge intents
 //   - the STEP MODEL completeness & dependency invariants
@@ -365,7 +365,7 @@ function testGenerateCandidates() {
 // -----------------------------------------------------------------------------
 
 async function main() {
-  console.log("=== IBAP Phase 6 — Planner Engine self-test ===\n");
+  console.log("=== PayMaster Phase 6 — Planner Engine self-test ===\n");
 
   await testExamplePayment();
   await testDirectPayment();

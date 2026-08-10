@@ -1,9 +1,9 @@
 import { PaymentCommandCenter } from "@/components/payment/PaymentCommandCenter";
 
 export const metadata = {
-  title: "IBAP · AI Payment Operations",
+  title: "PayMaster · Financial Assistant",
   description:
-    "Describe a business payment in plain language. IBAP parses the intent, builds a payment plan, and lets you approve & execute from the treasury.",
+    "Your financial assistant: ask in plain language to pay invoices, reimburse expenses, or settle vendors. PayMaster parses the intent, builds a plan, and lets you approve & execute from the treasury.",
 };
 
 export default function OperationsPage() {

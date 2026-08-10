@@ -54,6 +54,22 @@ export default function WalletCard({
     }
   };
 
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch {
+      // connect() surfaces errors via the `error` prop — no unhandled rejection.
+    }
+  };
+
+  const handleAssociate = async () => {
+    try {
+      await associateWallet();
+    } catch {
+      // associateWallet() surfaces errors via isSyncing/error state.
+    }
+  };
+
   const currentChainName = chainId ? CHAIN_NAMES[chainId] || `Unknown (ID: ${chainId})` : "None";
   
   // Check if connected network matches the business's preferred chain
@@ -153,7 +169,7 @@ export default function WalletCard({
               <div className="p-3 rounded-lg bg-brand-500/5 border border-brand-500/20 flex items-center justify-between">
                 <span className="text-xs text-gray-300">Wallet not associated yet</span>
                 <button
-                  onClick={associateWallet}
+                  onClick={handleAssociate}
                   disabled={isSyncing}
                   className="px-3 py-1 rounded bg-brand-500 text-white text-xs font-semibold hover:bg-brand-600 disabled:opacity-50 transition-all shadow-glow"
                 >
@@ -185,7 +201,7 @@ export default function WalletCard({
           )}
 
           <button
-            onClick={connect}
+            onClick={handleConnect}
             disabled={isConnecting}
             className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-cyan text-white text-sm font-bold shadow-glow hover:shadow-glow-cyan disabled:opacity-50 transition-all flex items-center justify-center gap-2"
           >

@@ -30,7 +30,7 @@ function check(name: string, cond: boolean, extra?: unknown) {
   }
 }
 
-console.log("IBAP Phase 11 dashboard self-test\n");
+console.log("PayMaster Phase 11 dashboard self-test\n");
 
 // --- FX conversion ------------------------------------------------------------
 console.log("FX conversion (reuses CURRENCY_CONFIG rates)");

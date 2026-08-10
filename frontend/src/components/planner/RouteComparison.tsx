@@ -1,7 +1,7 @@
 "use client";
 
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization · Route Comparison
+// PayMaster Phase 7 — Deterministic Route Optimization · Route Comparison
 //
 // Renders the output of POST /api/route/optim: every candidate payment route
 // scored by the normalized weighted model (LOWER IS BETTER), ranked best-first,

@@ -19,7 +19,7 @@ import { DashboardSkeleton, DemoBanner, LiveBadge, SectionErrorState } from "./s
 const DEFAULT_BUSINESS_ID = "b2000000-0000-0000-0000-000000000001";
 
 // =============================================================================
-// IBAP Business Payment Operations Dashboard — Phase 11.
+// PayMaster Business Payment Operations Dashboard — Phase 11.
 // Fetches the aggregated /api/dashboard payload and lays out the full
 // operations surface: AI command bar, treasury, operations, optimization,
 // route analytics, recent payments and the human approval queue.
@@ -50,7 +50,7 @@ export function DashboardPage() {
       const payload = (await res.json()) as DashboardData;
       setData(payload);
     } catch (err: any) {
-      console.error("[IBAP-dashboard] Failed to load:", err);
+      console.error("[PayMaster-dashboard] Failed to load:", err);
       setError(err?.message || "Failed to load dashboard data.");
       setData(null);
     } finally {
@@ -86,7 +86,7 @@ export function DashboardPage() {
               <LiveBadge />
             </div>
             <p className="text-gray-500 text-[13px] mt-0.5">
-              {businessName || "Corporate Treasury"} · Intent-based payment automation
+              {businessName || "Corporate Treasury"} · AI financial assistant
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export function DashboardPage() {
         />
       ) : (
         <>
-          {/* ======================= AI Payment Agent ======================= */}
+          {/* ======================= Financial Assistant ======================= */}
           <AIAgentCommand businessName={businessName} />
 
           {/* ======================= Treasury + Operations ======================= */}

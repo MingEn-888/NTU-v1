@@ -1,4 +1,4 @@
-# IBAP Phase 10 — Human Approval & Blockchain Execution Engine
+# PayMaster Phase 10 — Human Approval & Blockchain Execution Engine
 
 > The safety-critical bridge between an **approved, risk-checked payment plan**
 > and the **Phase 9 SmartWallet** on-chain execution layer.

@@ -1,5 +1,5 @@
 // =============================================================================
-// GET /api/dashboard — Phase 11 IBAP Business Payment Operations Dashboard.
+// GET /api/dashboard — Phase 11 PayMaster Business Payment Operations Dashboard.
 //
 // Aggregates treasury, payment operations, optimization metrics, route
 // analytics and the approval queue for a business in a single payload.
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data);
   } catch (err: any) {
-    console.warn("[IBAP-dashboard] Supabase unreachable, serving seeded demo:", err?.message);
+    console.warn("[PayMaster-dashboard] Supabase unreachable, serving seeded demo:", err?.message);
     return fallback(`Supabase unreachable: ${err?.message ?? "unknown error"}`);
   }
 }

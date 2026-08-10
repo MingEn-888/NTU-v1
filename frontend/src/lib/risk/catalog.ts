@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk Evaluation & Simulation (catalog & constants)
+// PayMaster Phase 8 — Risk Evaluation & Simulation (catalog & constants)
 //
 // Every threshold and weight the risk engine uses lives here as a constant
 // table — the SINGLE source of truth. Nothing in this file is influenced by

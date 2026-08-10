@@ -1,4 +1,4 @@
-# IBAP Phase 8 — Deterministic Risk Evaluation & Transaction Simulation Engine
+# PayMaster Phase 8 — Deterministic Risk Evaluation & Transaction Simulation Engine
 
 > **Role in the pipeline:** Phase 7 selected the *best route* deterministically.
 > **Phase 8 evaluates that selected route — and every candidate — BEFORE any

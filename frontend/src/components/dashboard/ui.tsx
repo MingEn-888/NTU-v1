@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import type { PaymentStatus, RiskLevel } from "@/lib/dashboard/types";
 
 // =============================================================================
-// Shared UI primitives for the IBAP dashboard — reusable across every section
+// Shared UI primitives for the PayMaster dashboard — reusable across every section
 // so the whole surface keeps one consistent fintech design language.
 // =============================================================================
 

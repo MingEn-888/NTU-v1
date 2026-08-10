@@ -68,7 +68,13 @@ export default function NetworkSelector({
           return (
             <button
               key={chain.id}
-              onClick={() => isWalletConnected && !isConnected && switchNetwork(chain.id)}
+              onClick={() => {
+                if (isWalletConnected && !isConnected) {
+                  switchNetwork(chain.id).catch(() => {
+                    // switchNetwork() already surfaces errors via wallet state.
+                  });
+                }
+              }}
               disabled={!isWalletConnected || isConnected}
               className={`w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all duration-200 ${
                 isConnected

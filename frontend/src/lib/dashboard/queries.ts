@@ -1,5 +1,5 @@
 // =============================================================================
-// Phase 11 — Supabase queries for the IBAP Business Payment Operations
+// Phase 11 — Supabase queries for the PayMaster Business Payment Operations
 // Dashboard. Server-side only (uses the service-role admin client). Each query
 // returns raw rows; the deterministic aggregation lives in analytics.ts so the
 // same math can be unit-tested / reused for the offline demo payload.

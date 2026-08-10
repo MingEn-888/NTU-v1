@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 10 — Human Approval & Blockchain Execution self-test
+// PayMaster Phase 10 — Human Approval & Blockchain Execution self-test
 // Exercises the execution engine core (no wallet / no key / no network needed):
 //   - SmartWallet deployment registry (31337 present, mainnet absent)
 //   - token decimals / native asset / amount -> wei parsing

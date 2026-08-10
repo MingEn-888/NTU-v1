@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization Engine (service)
+// PayMaster Phase 7 — Deterministic Route Optimization Engine (service)
 //
 // FLOW:
 //   Candidate Routes (from the Phase 6 planner — optionally LLM-proposed

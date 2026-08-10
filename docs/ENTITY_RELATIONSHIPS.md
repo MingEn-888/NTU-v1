@@ -1,7 +1,7 @@
-# IBAP Database Entity Relationship & Lifecycle Architecture
+# PayMaster Database Entity Relationship & Lifecycle Architecture
 
 ## 1. Overview
-The IBAP (Intent-Based Payment) database is structured using **Supabase PostgreSQL** to support deterministic, auditable payment operations for business enterprises.
+The PayMaster (Intent-Based Payment) database is structured using **Supabase PostgreSQL** to support deterministic, auditable payment operations for business enterprises.
 
 The entity relationships explicitly reflect the 8-stage payment lifecycle:
 **Payment Request → AI Intent → Payment Plan → Route Options → Risk Assessment → Approval → Execution (Txns) → Audit Logs**
@@ -76,7 +76,7 @@ erDiagram
 - **RLS**: Restricted to business owner via `public.is_payment_request_owner(payment_request_id)`.
 
 ### 6. `payment_plans`
-- **Purpose**: Optimized multi-step plan compiled by the IBAP Payment Router.
+- **Purpose**: Optimized multi-step plan compiled by the PayMaster Payment Router.
 - **Primary Key**: `id` (UUID).
 - **Foreign Keys**: `payment_request_id` -> `payment_requests.id`, `selected_route_id` -> `route_options.id` (`ON DELETE SET NULL`, Deferrable).
 - **Attributes**: `total_estimated_gas`, `estimated_duration` (sec), `savings`, `explanation`, `risk_score` (0–100).

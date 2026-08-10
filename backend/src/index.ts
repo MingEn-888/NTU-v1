@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/api/v1", healthRouter);
 
 app.listen(ENV.PORT, () => {
-  console.log(`[Backend] IBAP Payment Router running on port ${ENV.PORT} (${ENV.NODE_ENV})`);
+  console.log(`[Backend] PayMaster Payment Router running on port ${ENV.PORT} (${ENV.NODE_ENV})`);
 });
 
 export default app;

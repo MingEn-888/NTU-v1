@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Intent Parser
+// PayMaster Intent Parser
 // Deterministic natural-language intent engine for business payment operations.
 // Converts utterances like:
 //   "Pay Alice RM2,500 for invoice INV-1024 by Friday."

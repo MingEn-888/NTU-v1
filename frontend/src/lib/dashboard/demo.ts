@@ -1,5 +1,5 @@
 // =============================================================================
-// Phase 11 — Deterministic offline demo payload for the IBAP dashboard.
+// Phase 11 — Deterministic offline demo payload for the PayMaster dashboard.
 //
 // When Supabase is not configured (or unreachable) the /api/dashboard route
 // returns this payload so the dashboard still demonstrates the full business

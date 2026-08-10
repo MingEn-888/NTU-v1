@@ -1,7 +1,7 @@
 "use client";
 
 // =============================================================================
-// IBAP Phase 10 — Explicit Human Approval Interface.
+// PayMaster Phase 10 — Explicit Human Approval Interface.
 //
 // The final, unmistakable gate between the AI planning pipeline and on-chain
 // movement. Shows EVERYTHING the operator is about to sign:

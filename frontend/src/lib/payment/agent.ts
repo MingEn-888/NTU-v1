@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Agent reply composer
+// PayMaster Agent reply composer
 // Builds the natural-language narration (markdown) that accompanies the
 // structured PaymentRequestCard / payment plan rendered in chat.
 // =============================================================================
@@ -46,9 +46,9 @@ export function buildIntentNarration(intent: ParsedPaymentIntent): string {
 
 export function buildClarificationNarration(): string {
   return [
-    "I couldn't detect a complete payment operation from that message. To build a payment request, tell me the **recipient**, **amount** and (optionally) the **purpose** and **deadline**.",
+    "I couldn't detect a complete financial instruction from that. As your financial assistant I can pay invoices, reimburse expenses, settle vendors, or check the treasury.",
     "",
-    "For example:",
+    "For a payment, tell me the **recipient**, **amount** and (optionally) the **purpose** and **deadline**. For example:",
     "- \u201CPay Alice RM2,500 for invoice INV-1024 by Friday.\u201D",
     "- \u201CPay contractor $1,200 in USDC.\u201D",
     "- \u201CSettle invoice INV-2048 using treasury.\u201D",

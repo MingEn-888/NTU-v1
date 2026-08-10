@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization (weighted scoring model)
+// PayMaster Phase 7 — Deterministic Route Optimization (weighted scoring model)
 //
 //   Score(r) = wg*Gas(r) + wt*Time(r) + ws*Steps(r) + wr*Risk(r)
 //

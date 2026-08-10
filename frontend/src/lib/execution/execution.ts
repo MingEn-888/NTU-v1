@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 10 — Human Approval & Blockchain Execution engine.
+// PayMaster Phase 10 — Human Approval & Blockchain Execution engine.
 //
 // The ONLY place the frontend turns an APPROVED plan into on-chain execution:
 //   buildExecutionPlan()  — deterministic, validated step -> SmartWallet payload

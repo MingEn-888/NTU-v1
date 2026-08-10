@@ -1,6 +1,6 @@
 // =============================================================================
 // POST /api/risk/simulate
-// IBAP Phase 8 — Risk Evaluation & Transaction Simulation Engine endpoint.
+// PayMaster Phase 8 — Risk Evaluation & Transaction Simulation Engine endpoint.
 //
 // Evaluates a payment plan BEFORE any human approval:
 //   - runs the 7 deterministic risk checks
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Unexpected errors.
-    console.error("[IBAP-risk] /api/risk/simulate unexpected error:", err);
+    console.error("[PayMaster-risk] /api/risk/simulate unexpected error:", err);
     const message = err instanceof Error ? err.message : "Unexpected server error";
     return errorResponse("INTERNAL", message, undefined, 500);
   }

@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 4 — AI Payment Operations domain types
+// PayMaster Phase 4 — AI Payment Operations domain types
 // These types model the full Natural Language -> Payment Request -> Plan -> Approval
 // lifecycle that the payment operations agent walks the user through.
 // =============================================================================

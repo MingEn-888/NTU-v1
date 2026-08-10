@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 5 — AI Intent & Payment Extraction Engine
+// PayMaster Phase 5 — AI Intent & Payment Extraction Engine
 // Schema + system prompt for converting natural-language business payment
 // instructions into a validated, structured intent.
 //
@@ -139,8 +139,8 @@ export type StructuredIntent = z.infer<typeof StructuredIntentSchema>;
 // -----------------------------------------------------------------------------
 
 export const INTENT_SYSTEM_PROMPT = `
-You are the IBAP Intent Extraction Engine, a component of an Intent-Based Agentic
-Payment (IBAP) treasury system.
+You are the PayMaster Intent Extraction Engine, a component of a deterministic
+PayMaster treasury system.
 
 Your ONLY job is to convert a user's natural-language business payment instruction
 into a single, precise, structured JSON intent. You never execute payments, never

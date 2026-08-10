@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization (catalog & constants)
+// PayMaster Phase 7 — Deterministic Route Optimization (catalog & constants)
 //
 // The default weights below are the SINGLE source of truth for how the engine
 // trades cost against safety. Nothing in this file is influenced by the LLM —

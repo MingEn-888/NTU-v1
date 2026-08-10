@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Plain-English explanation (grounded in validated data only)
+// PayMaster Phase 8 — Plain-English explanation (grounded in validated data only)
 //
 // The explanation is generated from the VALIDATED simulation result — never
 // from the LLM's imagination. Two layers:
@@ -237,7 +237,7 @@ export async function generateExplanation(
         {
           role: "system",
           content:
-            "You are the IBAP risk explanation writer. You explain WHY a payment plan is risky or safe for a business treasurer.\n" +
+            "You are the PayMaster risk explanation writer. You explain WHY a payment plan is risky or safe for a business treasurer.\n" +
             "CRITICAL RULES:\n" +
             "1. Write plain-English QUALITATIVE prose only. NEVER output any number, currency amount, percentage, fee, rate or statistic.\n" +
             "2. Base your reasoning EXCLUSIVELY on the validated simulation data provided in the JSON. Do not invent facts, prices, routes or warnings.\n" +
@@ -259,7 +259,7 @@ export async function generateExplanation(
 
     return { text: `${safeProse} ${deterministic}`, source: "ai" };
   } catch (err) {
-    console.error("[IBAP-risk] AI explanation unavailable, using deterministic:", err);
+    console.error("[PayMaster-risk] AI explanation unavailable, using deterministic:", err);
     return { text: deterministic, source: "deterministic" };
   }
 }

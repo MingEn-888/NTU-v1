@@ -13,7 +13,7 @@ interface ChatInputProps {
 export function ChatInput({
   onSend,
   disabled,
-  placeholder = 'Describe a business payment… e.g. "Pay Alice RM2,500 for invoice INV-1024 by Friday."',
+  placeholder = 'Ask your financial assistant… e.g. "Pay Alice RM2,500 for invoice INV-1024 by Friday."',
   suggestions = [],
 }: ChatInputProps) {
   const [value, setValue] = useState("");
@@ -48,7 +48,7 @@ export function ChatInput({
 
   return (
     <div className="space-y-3">
-      {/* Suggested business payment instructions */}
+      {/* Suggested things to ask the financial assistant */}
       {suggestions.length > 0 && (
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
           <Sparkles className="h-3.5 w-3.5 text-brand-cyan shrink-0" />

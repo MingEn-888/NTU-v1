@@ -79,8 +79,8 @@ export function ChatMessage({
           }`}
         >
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-cyan">IBAP</span>
-            <span className="text-[9px] text-gray-600">Payment Operations Agent</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-brand-cyan">PayMaster</span>
+            <span className="text-[9px] text-gray-600">Financial Assistant</span>
             {message.status === "streaming" && (
               <span className="px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 text-[9px] font-bold uppercase animate-pulse">
                 thinking

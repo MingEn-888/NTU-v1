@@ -1,5 +1,5 @@
 // =============================================================================
-// Phase 11 — Deterministic analytics + aggregation for the IBAP dashboard.
+// Phase 11 — Deterministic analytics + aggregation for the PayMaster dashboard.
 //
 // Every function here is pure: it takes raw rows (queries.ts) and returns the
 // shaped DashboardData sub-objects (types.ts). The same functions drive the

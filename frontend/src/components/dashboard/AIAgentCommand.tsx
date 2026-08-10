@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 // =============================================================================
-// AI Payment Agent — the large command surface of the dashboard.
+// Financial Assistant — the large command surface of the dashboard.
 // "Describe a payment…" in plain business language; the agent parses intent,
 // builds a plan and routes it to the human approval gate. No funds move until
 // an operator approves. Submitting deep-links into the Payment Operations
@@ -77,13 +77,13 @@ export function AIAgentCommand({ businessName }: { businessName?: string }) {
             </div>
             <div>
               <h2 className="text-[16px] font-extrabold text-white tracking-tight leading-tight">
-                AI Payment Agent
+                Financial Assistant
               </h2>
               <p className="text-[11px] text-gray-500">
                 {businessName
                   ? `${businessName} · `
                   : ""}
-                Describe a business payment — the agent handles intent, routing & risk.
+                Ask in plain language — the assistant handles intent, routing & risk. No funds move until you approve.
               </p>
             </div>
           </div>

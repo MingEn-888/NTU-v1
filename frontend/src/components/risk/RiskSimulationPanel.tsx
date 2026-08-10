@@ -1,7 +1,7 @@
 "use client";
 
 // =============================================================================
-// IBAP Phase 8 — Risk Evaluation & Transaction Simulation · UI Panel
+// PayMaster Phase 8 — Risk Evaluation & Transaction Simulation · UI Panel
 //
 // Evaluates a payment plan BEFORE human approval:
 //   - renders the 7 deterministic risk checks (PASS / WARN / FAIL)

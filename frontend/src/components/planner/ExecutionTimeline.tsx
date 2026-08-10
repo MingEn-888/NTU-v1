@@ -1,7 +1,7 @@
 "use client";
 
 // =============================================================================
-// IBAP Phase 6 — Payment Plan Execution Timeline
+// PayMaster Phase 6 — Payment Plan Execution Timeline
 //
 // Renders the candidate execution plans produced by POST /api/planner as an
 // animated vertical timeline of deterministic blockchain steps. Communicates

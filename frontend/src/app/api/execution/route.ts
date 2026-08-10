@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
             approved_at: new Date().toISOString(),
             approved_by_address: body.approvedByAddress ?? null,
             risk_level: body.riskLevel ?? null,
-            note: "Approved via IBAP Phase 10 approval gate.",
+            note: "Approved via PayMaster Phase 10 approval gate.",
           })
           .select()
           .single();

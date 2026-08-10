@@ -1,5 +1,5 @@
 // =============================================================================
-// Phase 11 — IBAP Business Payment Operations Dashboard types.
+// Phase 11 — PayMaster Business Payment Operations Dashboard types.
 //
 // These are the canonical shapes the dashboard renders. The server route
 // (/api/dashboard) produces a fully-shaped DashboardData payload from either

@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Adapters: build a SimulationRequest from upstream plans
+// PayMaster Phase 8 — Adapters: build a SimulationRequest from upstream plans
 //
 // The risk engine takes a normalized SimulationRequest. These adapters convert
 // the Phase 4 (PaymentPlan) and Phase 6 (CandidateExecutionPlan) representations

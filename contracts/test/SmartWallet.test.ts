@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import type { SmartWallet, MockERC20, ReentrancyAttacker } from "../typechain-types";
 
-describe("SmartWallet (IBAP Phase 9)", () => {
+describe("SmartWallet (PayMaster Phase 9)", () => {
   // ------------------------------------------------------------------
   // Fixtures
   // ------------------------------------------------------------------
