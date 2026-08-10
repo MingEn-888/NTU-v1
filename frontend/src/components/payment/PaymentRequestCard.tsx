@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   User,
   Landmark,
@@ -21,6 +21,9 @@ import {
 } from "lucide-react";
 import type { ParsedPaymentIntent, PaymentPlan, PaymentStep, RiskAssessment } from "@/lib/payment/types";
 import { currencySymbol } from "@/lib/payment/planGenerator";
+import { RiskSimulationPanel } from "@/components/risk/RiskSimulationPanel";
+import { simulationRequestFromPlan } from "@/lib/risk/adapter";
+import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
 
 export type PaymentCardPhase = "detected" | "plan" | "executing" | "complete" | "failed";
 
@@ -35,6 +38,8 @@ interface PaymentRequestCardProps {
   txHash?: string | null;
   explorerUrl?: string | null;
   error?: string | null;
+  /** Treasury context (assets / chains / gas) used by the Phase 8 risk engine. */
+  simulationContext?: SimulationTreasuryLike | null;
 }
 
 const PHASE_META: Record<PaymentCardPhase, { label: string; className: string; dot: string }> = {
@@ -116,8 +121,15 @@ export default function PaymentRequestCard({
   txHash,
   explorerUrl,
   error,
+  simulationContext,
 }: PaymentRequestCardProps) {
   const meta = PHASE_META[phase];
+
+  // Phase 8 — build the normalized simulation request from the intent + plan.
+  const simRequest = useMemo(() => {
+    if (!plan) return null;
+    return simulationRequestFromPlan(intent, plan, simulationContext);
+  }, [intent, plan, simulationContext]);
 
   const amountText =
     intent.amount !== null && intent.currency
@@ -309,6 +321,18 @@ export default function PaymentRequestCard({
             <p className="text-[11px] text-gray-400 leading-relaxed bg-black/25 border border-white/5 rounded-xl p-3">
               {plan.explanation}
             </p>
+
+            {/* Phase 8 — Risk evaluation & simulation BEFORE approval. The
+                engine never auto-executes: the human must Review Payment, then
+                Confirm & Sign in their wallet. */}
+            {phase === "plan" && simRequest && (
+              <RiskSimulationPanel
+                request={simRequest}
+                onReview={onApprove}
+                onReject={onReject}
+                approvalState="pending"
+              />
+            )}
           </div>
         )}
 
@@ -373,24 +397,8 @@ export default function PaymentRequestCard({
           </button>
         )}
 
-        {phase === "plan" && (
-          <div className="flex gap-2">
-            <button
-              onClick={onReject}
-              disabled={false}
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[12px] font-bold transition-all"
-            >
-              Reject
-            </button>
-            <button
-              onClick={onApprove}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 transition-all"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Approve & Execute
-            </button>
-          </div>
-        )}
+        {/* Phase 8 — approval is now handled by the RiskSimulationPanel above:
+            Review Payment -> Confirm & Sign (explicit human approval, no auto-exec). */}
       </div>
     </div>
   );

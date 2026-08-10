@@ -5,6 +5,7 @@ import { Bot, User, AlertCircle } from "lucide-react";
 import type { ChatMessage as ChatMessageModel } from "@/lib/payment/types";
 import { Markdown } from "./Markdown";
 import PaymentRequestCard, { type PaymentCardPhase } from "@/components/payment/PaymentRequestCard";
+import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
 
 export interface ExecutionResult {
   status: "complete" | "failed";
@@ -22,6 +23,7 @@ interface ChatMessageProps {
   onApprove?: (msg: ChatMessageModel) => void;
   onReject?: (msg: ChatMessageModel) => void;
   txResult?: ExecutionResult | null;
+  simulationContext?: SimulationTreasuryLike | null;
 }
 
 export function ChatMessage({
@@ -33,6 +35,7 @@ export function ChatMessage({
   onApprove,
   onReject,
   txResult,
+  simulationContext,
 }: ChatMessageProps) {
   const isUser = message.role === "user";
 
@@ -109,6 +112,7 @@ export function ChatMessage({
                     txHash={txResult?.txHash}
                     explorerUrl={txResult?.explorerUrl}
                     error={txResult?.error}
+                    simulationContext={simulationContext}
                   />
                 </div>
               )}

@@ -13,6 +13,7 @@ import {
   buildClarificationNarration,
   buildPlanNarration,
 } from "@/lib/payment/agent";
+import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
 
 // ---------------------------------------------------------------------------
 // Wallet surface needed by the agent (subset of useWallet)
@@ -32,6 +33,8 @@ interface ChatWindowProps {
   businessName?: string;
   wallet: ChatWalletApi;
   onOperationStageChange?: (stage: OperationStage) => void;
+  /** Treasury context (assets / chains / gas) fed to the Phase 8 risk engine. */
+  simulationContext?: SimulationTreasuryLike | null;
 }
 
 const SUGGESTIONS = [
@@ -68,7 +71,7 @@ async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promi
   }
 }
 
-export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange }: ChatWindowProps) {
+export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [sending, setSending] = useState(false);
@@ -455,6 +458,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
             onApprove={handleApprove}
             onReject={handleReject}
             txResult={executionResults[m.id] || null}
+            simulationContext={simulationContext}
           />
         ))}
 

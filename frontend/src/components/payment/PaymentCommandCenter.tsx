@@ -15,6 +15,7 @@ import {
 import { useWallet } from "@/hooks/useWallet";
 import { useTreasury } from "@/hooks/useTreasury";
 import { ChatWindow } from "@/components/chat/ChatWindow";
+import { RiskSimulationPanel } from "@/components/risk/RiskSimulationPanel";
 import type { OperationStage } from "@/lib/payment/types";
 import { formatAddress } from "@/lib/utils";
 
@@ -194,6 +195,7 @@ export function PaymentCommandCenter() {
                 executeSmartWalletBatch: wallet.executeSmartWalletBatch,
               }}
               onOperationStageChange={setStage}
+              simulationContext={treasury.treasuryContext}
             />
           </div>
         </div>
@@ -209,6 +211,17 @@ export function PaymentCommandCenter() {
           />
           <OperationStatusCard stage={stage} />
         </div>
+      </div>
+
+      {/* ======================= Phase 8 preview ======================= */}
+      <div className="mt-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+            Phase 8 · Risk &amp; Simulation preview
+          </div>
+          <div className="h-px flex-1 bg-white/5" />
+        </div>
+        <RiskSimulationPanel />
       </div>
     </div>
   );
