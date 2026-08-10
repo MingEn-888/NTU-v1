@@ -1,11 +1,11 @@
-import { DashboardPage } from "@/components/dashboard/DashboardPage";
+import { BusinessDashboard } from "@/components/business/BusinessDashboard";
 
 export const metadata = {
   title: "PayMaster · Business Payments",
   description:
-    "Corporate payment automation dashboard: treasury position, financial assistant, route optimization analytics, and the human approval queue.",
+    "Corporate payment operations dashboard: treasury overview, AI payment command, settlement rails, spending insights, payment activity and the human approval queue.",
 };
 
 export default function DashboardRoute() {
-  return <DashboardPage />;
+  return <BusinessDashboard />;
 }

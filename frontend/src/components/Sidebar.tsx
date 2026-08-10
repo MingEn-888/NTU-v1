@@ -13,6 +13,8 @@ import {
   PlayCircle,
   Globe,
   ChevronRight,
+  ReceiptText,
+  BarChart3,
 } from "lucide-react";
 
 interface NavItem {
@@ -35,10 +37,12 @@ export const Sidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { id: "payments", label: "Payments", icon: ReceiptText, href: "/payments" },
     { id: "demo", label: "Product Demo", icon: PlayCircle, href: "/demo", badge: "Walkthrough" },
     { id: "create", label: "New Intent", icon: Send, href: "/operations", badge: "Live" },
     { id: "routes", label: "Route Optimizer", icon: Route, href: "/", badge: "Demo" },
     { id: "history", label: "Tx History", icon: History, href: "/dashboard" },
+    { id: "analytics", label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
     { id: "settings", label: "Preferences", icon: Settings, href: "/settings" },
   ];
 
@@ -67,10 +71,11 @@ export const Sidebar: React.FC = () => {
 
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              item.href !== "/"
-                ? pathname?.startsWith(item.href)
-                : pathname === "/";
+            const isActive = (() => {
+              if (item.href === "/") return pathname === "/";
+              const base = item.href.split("#")[0];
+              return pathname?.startsWith(base) ?? false;
+            })();
             return (
               <Link
                 key={item.id}
