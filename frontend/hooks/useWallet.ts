@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ethers } from "ethers";
+import type { ExecutionOutcome, ExecutionPlan } from "@/lib/execution/types";
+import { ExecutionError } from "@/lib/execution/types";
+import { mapEthersError } from "@/lib/execution/errors";
+import { computeGasCostUsd, confirmExecution, executePlan } from "@/lib/execution/execution";
+import { getSmartWalletDeployment } from "@/lib/execution/abi";
+import { buildExplorerUrl } from "@/lib/payment/execution";
 
 declare global {
   interface Window {
@@ -312,6 +318,61 @@ export function useWallet() {
     return await tx.wait();
   }, [state.address, state.chainId]);
 
+  // ---------------------------------------------------------------------------
+  // Phase 10 — execute an APPROVED, RISK-CHECKED plan through the SmartWallet.
+  // This is the ONLY sanctioned execution path after human approval. The LLM
+  // never reaches this point on its own — the UI only calls this after the
+  // operator explicitly presses "Approve & exec".
+  // Lifecycle: SUBMITTED (broadcast) -> PENDING (mempool) -> CONFIRMED (mined).
+  // Every failure is mapped to a typed ExecutionError (rejected / insufficient
+  // balance / RPC timeout / contract revert / wrong network / disconnected).
+  // ---------------------------------------------------------------------------
+  const executeSmartWalletPlan = useCallback(
+    async (plan: ExecutionPlan): Promise<ExecutionOutcome> => {
+      if (!state.address || !providerRef.current) {
+        throw new ExecutionError("WALLET_NOT_CONNECTED", "Wallet is not connected.");
+      }
+      if (!state.chainId) {
+        throw new ExecutionError("WALLET_NOT_CONNECTED", "Wallet chain is unknown — reconnect.");
+      }
+      if (state.chainId !== plan.chainId) {
+        throw new ExecutionError(
+          "WRONG_NETWORK",
+          `Wallet is on chain ${state.chainId} but the payment plan targets chain ${plan.chainId}. Switch networks and try again.`
+        );
+      }
+      if (!getSmartWalletDeployment(state.chainId)) {
+        throw new ExecutionError(
+          "NOT_DEPLOYED",
+          `SmartWallet is not deployed on chain ${state.chainId}. Run the Phase 9 deploy script first.`
+        );
+      }
+
+      const provider = providerRef.current;
+      try {
+        // 1. SUBMITTED — broadcast the validated batch through the SmartWallet.
+        const { txHash } = await executePlan(provider, plan);
+        // 2. PENDING -> CONFIRMED — wait for the mined receipt.
+        const receipt = await confirmExecution(provider, plan, txHash);
+        const gasUsed = (receipt?.gasUsed ?? BigInt(0)).toString();
+        const gasCostUsd = computeGasCostUsd(receipt ?? {}, plan.chainId);
+        const explorerUrl = buildExplorerUrl(plan.chainId, txHash);
+        return {
+          txHash,
+          status: "CONFIRMED",
+          gasUsed,
+          gasCostUsd,
+          explorerUrl,
+          receipt,
+          error: null,
+        };
+      } catch (err: unknown) {
+        throw mapEthersError(err, { walletChainId: state.chainId, planChainId: plan.chainId });
+      }
+    },
+    [state.address, state.chainId]
+  );
+
   // Handle Event Listeners & Autoconnect (Reconnect)
   useEffect(() => {
     if (typeof window === "undefined" || !window.ethereum) return;
@@ -361,5 +422,6 @@ export function useWallet() {
     switchNetwork,
     executePayment,
     executeSmartWalletBatch,
+    executeSmartWalletPlan,
   };
 }

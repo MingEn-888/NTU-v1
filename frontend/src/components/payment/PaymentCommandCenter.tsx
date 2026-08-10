@@ -193,6 +193,7 @@ export function PaymentCommandCenter() {
                 connect: wallet.connect,
                 executePayment: wallet.executePayment,
                 executeSmartWalletBatch: wallet.executeSmartWalletBatch,
+                executeSmartWalletPlan: wallet.executeSmartWalletPlan,
               }}
               onOperationStageChange={setStage}
               simulationContext={treasury.treasuryContext}

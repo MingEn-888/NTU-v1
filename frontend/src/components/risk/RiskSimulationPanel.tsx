@@ -58,6 +58,9 @@ export interface RiskSimulationPanelProps {
   /** Human-approval callbacks (the engine never executes on its own). */
   onReview?: () => void;
   onReject?: () => void;
+  /** Fired whenever the evaluated result changes (used by Phase 10 to share
+   *  the same SimulationResult with the ApprovalPanel / execution timeline). */
+  onResultChange?: (result: SimulationResult | null) => void;
   /** External execution state to reflect (executing / complete / failed). */
   approvalState?: "pending" | "reviewing" | "executing" | "complete" | "failed";
   /** Re-label the primary approval button (default "Review Payment"). */
@@ -209,6 +212,7 @@ export function RiskSimulationPanel({
   error: errorProp,
   onReview,
   onReject,
+  onResultChange,
   approvalState: approvalStateProp,
   reviewLabel = "Review Payment",
   compact,
@@ -247,10 +251,12 @@ export function RiskSimulationPanel({
         if (cancelled) return;
         setLocalResult(r);
         setReviewing(false);
+        onResultChange?.(r);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
         setLocalError(err instanceof Error ? err.message : "Simulation failed");
+        onResultChange?.(null);
       })
       .finally(() => {
         if (!cancelled) setLocalLoading(false);
@@ -260,6 +266,12 @@ export function RiskSimulationPanel({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlled, JSON.stringify(activeRequest)]);
+
+  // Report the result upward in controlled mode so Phase 10 can reuse the same
+  // SimulationResult (risk score + AI explanation) in the approval panel.
+  useEffect(() => {
+    if (resultProp !== undefined) onResultChange?.(resultProp ?? null);
+  }, [resultProp, onResultChange]);
 
   // Reset the acknowledgement when a new result arrives.
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   User,
   Landmark,
@@ -24,6 +24,10 @@ import { currencySymbol } from "@/lib/payment/planGenerator";
 import { RiskSimulationPanel } from "@/components/risk/RiskSimulationPanel";
 import { simulationRequestFromPlan } from "@/lib/risk/adapter";
 import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
+import type { SimulationResult } from "@/lib/risk/types";
+import type { ExecutionPlan } from "@/lib/execution/types";
+import { ApprovalPanel } from "@/components/execution/ApprovalPanel";
+import { ExecutionFlowTimeline, type ExecutionFlowStage } from "@/components/execution/ExecutionFlowTimeline";
 
 export type PaymentCardPhase = "detected" | "plan" | "executing" | "complete" | "failed";
 
@@ -40,6 +44,8 @@ interface PaymentRequestCardProps {
   error?: string | null;
   /** Treasury context (assets / chains / gas) used by the Phase 8 risk engine. */
   simulationContext?: SimulationTreasuryLike | null;
+  /** Phase 10 — validated execution plan ready for the explicit approval gate. */
+  executionPlan?: ExecutionPlan | null;
 }
 
 const PHASE_META: Record<PaymentCardPhase, { label: string; className: string; dot: string }> = {
@@ -122,6 +128,7 @@ export default function PaymentRequestCard({
   explorerUrl,
   error,
   simulationContext,
+  executionPlan,
 }: PaymentRequestCardProps) {
   const meta = PHASE_META[phase];
 
@@ -130,6 +137,33 @@ export default function PaymentRequestCard({
     if (!plan) return null;
     return simulationRequestFromPlan(intent, plan, simulationContext);
   }, [intent, plan, simulationContext]);
+
+  // Phase 8 — the RiskSimulationPanel evaluates the request and reports the
+  // result upward (onResultChange) so the SAME SimulationResult feeds the
+  // Phase 10 approval panel (risk score + AI explanation).
+  const [simulation, setSimulation] = useState<SimulationResult | null>(null);
+  useEffect(() => {
+    setSimulation(null);
+  }, [JSON.stringify(simRequest)]);
+
+  // Phase 10 — explicit approval gate state. "Confirm & Sign" on the risk panel
+  // arms this; the ApprovalPanel then requires [Approve & exec] / [Reject].
+  const [approvalArmed, setApprovalArmed] = useState(false);
+  useEffect(() => {
+    setApprovalArmed(false);
+  }, [plan, phase]);
+
+  // Derive the execution timeline stage from the card phase + approval state.
+  const timelineStage: ExecutionFlowStage =
+    phase === "complete"
+      ? "confirmed"
+      : phase === "failed" || phase === "executing"
+      ? "executing"
+      : approvalArmed
+      ? "approved"
+      : phase === "plan"
+      ? "risk_checked"
+      : "understood";
 
   const amountText =
     intent.amount !== null && intent.currency
@@ -259,6 +293,15 @@ export default function PaymentRequestCard({
         {/* PLAN SECTION */}
         {plan && phase !== "detected" && (
           <div className="space-y-4 border-t border-white/10 pt-4">
+            {/* Phase 10 — full execution timeline (understood → confirmed). */}
+            <ExecutionFlowTimeline
+              stage={timelineStage}
+              failed={phase === "failed"}
+              error={error}
+              txHash={txHash}
+              explorerUrl={explorerUrl}
+            />
+
             {/* Settlement summary */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 text-[12px] text-gray-300">
@@ -324,14 +367,31 @@ export default function PaymentRequestCard({
 
             {/* Phase 8 — Risk evaluation & simulation BEFORE approval. The
                 engine never auto-executes: the human must Review Payment, then
-                Confirm & Sign in their wallet. */}
+                Confirm & Sign, and finally Approve & exec in the Phase 10 gate. */}
             {phase === "plan" && simRequest && (
-              <RiskSimulationPanel
-                request={simRequest}
-                onReview={onApprove}
-                onReject={onReject}
-                approvalState="pending"
-              />
+              <>
+                <RiskSimulationPanel
+                  request={simRequest}
+                  onResultChange={setSimulation}
+                  onReview={approvalArmed ? undefined : () => setApprovalArmed(true)}
+                  onReject={approvalArmed ? undefined : onReject}
+                />
+
+                {/* Phase 10 — explicit human approval interface. Nothing is sent
+                    to the SmartWallet until [Approve & exec] is pressed. */}
+                {approvalArmed && executionPlan && (
+                  <ApprovalPanel
+                    plan={executionPlan}
+                    simulation={simulation}
+                    approving={false}
+                    onApprove={() => {
+                      setApprovalArmed(false);
+                      onApprove?.();
+                    }}
+                    onReject={onReject}
+                  />
+                )}
+              </>
             )}
           </div>
         )}

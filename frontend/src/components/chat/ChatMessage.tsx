@@ -3,6 +3,7 @@
 import React from "react";
 import { Bot, User, AlertCircle } from "lucide-react";
 import type { ChatMessage as ChatMessageModel } from "@/lib/payment/types";
+import type { ExecutionPlan } from "@/lib/execution/types";
 import { Markdown } from "./Markdown";
 import PaymentRequestCard, { type PaymentCardPhase } from "@/components/payment/PaymentRequestCard";
 import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
@@ -24,6 +25,7 @@ interface ChatMessageProps {
   onReject?: (msg: ChatMessageModel) => void;
   txResult?: ExecutionResult | null;
   simulationContext?: SimulationTreasuryLike | null;
+  executionPlan?: ExecutionPlan | null;
 }
 
 export function ChatMessage({
@@ -36,6 +38,7 @@ export function ChatMessage({
   onReject,
   txResult,
   simulationContext,
+  executionPlan,
 }: ChatMessageProps) {
   const isUser = message.role === "user";
 
@@ -113,6 +116,7 @@ export function ChatMessage({
                     explorerUrl={txResult?.explorerUrl}
                     error={txResult?.error}
                     simulationContext={simulationContext}
+                    executionPlan={executionPlan}
                   />
                 </div>
               )}
