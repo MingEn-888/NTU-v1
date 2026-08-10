@@ -1,10 +1,10 @@
 # IMPLEMENTATION ROADMAP
 - [x] Phase 1: Workspace & Monorepo Setup
 - [x] Phase 2: IBAP Database & Supabase Setup
-- [ ] Phase 3: MetaMask & Web3 Integration
-- [ ] Phase 4: AI Chat Interface
-- [ ] Phase 5: Intent Parsing Engine
-- [ ] Phase 6: Transaction Planner Engine
+- [x] Phase 3: MetaMask & Web3 Integration
+- [x] Phase 4: AI Chat Interface
+- [x] Phase 5: Intent Parsing Engine
+- [x] Phase 6: Transaction Planner Engine
 - [ ] Phase 7: Route Optimizer
 - [ ] Phase 8: Transaction Simulation Engine
 - [ ] Phase 9: Smart Wallet Contract

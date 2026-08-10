@@ -42,11 +42,26 @@ const config: Config = {
       animation: {
         pulseFast: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         glow: "glow 3s infinite alternate",
+        "step-pop": "step-pop 0.35s ease-out both",
+        "exec-pulse": "exec-pulse 1.4s ease-in-out infinite",
+        "flow-dash": "flow-dash 0.6s linear infinite",
       },
       keyframes: {
         glow: {
           "0%": { opacity: "0.4", filter: "blur(20px)" },
           "100%": { opacity: "0.8", filter: "blur(30px)" },
+        },
+        "step-pop": {
+          "0%": { opacity: "0", transform: "scale(0.6)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "exec-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.55" },
+        },
+        "flow-dash": {
+          from: { backgroundPosition: "0 0" },
+          to: { backgroundPosition: "0 10px" },
         },
       },
     },

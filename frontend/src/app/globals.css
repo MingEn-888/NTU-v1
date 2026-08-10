@@ -68,3 +68,13 @@ body {
     text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
   }
 }
+
+/* Execution timeline — animated connector for in-progress steps */
+.flow-line-dash {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.85) 0 5px,
+    transparent 5px 10px
+  );
+  animation: flow-dash 0.6s linear infinite;
+}
