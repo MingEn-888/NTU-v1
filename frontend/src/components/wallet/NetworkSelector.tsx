@@ -89,7 +89,7 @@ export default function NetworkSelector({
                 <div
                   className={`h-8 w-8 rounded-lg flex items-center justify-center font-bold text-xs uppercase ${
                     isConnected
-                      ? "bg-brand-500 text-white"
+                      ? "bg-brand-500 text-on-accent"
                       : "bg-white/10 text-gray-300"
                   }`}
                 >

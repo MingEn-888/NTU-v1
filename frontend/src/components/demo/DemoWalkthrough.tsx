@@ -443,7 +443,7 @@ export function DemoWalkthrough() {
               <button
                 onClick={() => setApproved(true)}
                 disabled={!approvalEnabled}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-sm font-bold shadow-glow-emerald hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-on-accent text-sm font-bold shadow-glow-emerald hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <BadgeCheck className="h-4 w-4" />
                 Approve &amp; sign {isHighRisk && !highRiskAck ? "(acknowledge first)" : "(simulated)"}
@@ -546,7 +546,7 @@ export function DemoWalkthrough() {
         </div>
         <Link
           href={`/operations?prompt=${encodeURIComponent(DEFAULT_DEMO_INSTRUCTION)}`}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-white text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-on-accent text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
         >
           <Play className="h-4 w-4" /> Open Financial Assistant
         </Link>

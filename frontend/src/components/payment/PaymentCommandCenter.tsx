@@ -97,7 +97,7 @@ export function PaymentCommandCenter() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center gap-5 justify-between">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-              <MessageSquareText className="h-7 w-7 text-white" />
+              <MessageSquareText className="h-7 w-7 text-on-accent" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
@@ -134,7 +134,7 @@ export function PaymentCommandCenter() {
               className={`px-4 py-2.5 rounded-xl text-[12px] font-bold flex items-center gap-2 transition-all ${
                 wallet.isConnected
                   ? "bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20"
-                  : "bg-gradient-to-r from-brand-600 to-brand-accent text-white shadow-glow hover:from-brand-500 hover:to-brand-600"
+                  : "bg-gradient-to-r from-brand-600 to-brand-accent text-on-accent shadow-glow hover:from-brand-500 hover:to-brand-600"
               }`}
             >
               {wallet.isConnecting ? (

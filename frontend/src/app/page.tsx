@@ -13,13 +13,15 @@ import {
   ExternalLink,
   LayoutDashboard,
   MessageSquareText,
-  PlayCircle
+  PlayCircle,
+  Globe
 } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
 import { useTreasury } from "@/hooks/useTreasury";
 import WalletCard from "@/components/wallet/WalletCard";
 import TreasuryOverview from "@/components/wallet/TreasuryOverview";
 import NetworkSelector from "@/components/wallet/NetworkSelector";
+import { EcosystemNetworkPanel } from "@/components/web3/NetworkSelector";
 
 export default function Home() {
   const wallet = useWallet();
@@ -125,21 +127,21 @@ export default function Home() {
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-white text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-mint-300 text-on-accent text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
             >
               <LayoutDashboard className="h-4 w-4" />
               Business Payments Dashboard
             </Link>
             <Link
               href="/operations"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10 hover:text-white transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10 hover:text-gray-100 transition-all"
             >
               <MessageSquareText className="h-4 w-4" />
               Open Financial Assistant
             </Link>
             <Link
               href="/demo"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-brand-500/30 text-brand-200 text-sm font-bold hover:bg-brand-500/10 hover:text-white transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-brand-500/30 text-brand-300 text-sm font-bold hover:bg-brand-500/10 hover:text-brand-200 transition-all"
             >
               <PlayCircle className="h-4 w-4" />
               Product Demo
@@ -191,6 +193,18 @@ export default function Home() {
           <div className="text-2xl font-bold text-white">SmartWallet</div>
           <div className="text-xs text-gray-400">Auditable · nonce-protected</div>
         </div>
+      </div>
+
+      {/* SECTION: Multi-Ecosystem Routing (Web3) */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-extrabold text-gray-100 flex items-center gap-2">
+          <Globe className="h-5 w-5 text-brand-cyan" />
+          <span>Multi-Ecosystem Routing</span>
+          <span className="px-2 py-0.5 text-[10px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 rounded-full">
+            Ethereum · Solana · Polygon · BNB · more
+          </span>
+        </h2>
+        <EcosystemNetworkPanel />
       </div>
 
       {/* SECTION: Treasury Command Center (Phase 3 Core UI) */}
@@ -353,7 +367,7 @@ export default function Home() {
             <button
               onClick={activeTab === "smart" ? handleExecuteSmartIntent : handleExecutePayment}
               disabled={executing}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-accent text-white font-bold text-sm shadow-glow disabled:opacity-50 transition-all"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-accent text-on-accent font-bold text-sm shadow-glow disabled:opacity-50 transition-all"
             >
               {executing ? "Processing Transaction..." : activeTab === "smart" ? "Execute Smart Intent Batch" : "Execute Standard Transfer"}
             </button>

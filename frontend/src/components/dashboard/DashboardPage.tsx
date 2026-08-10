@@ -76,7 +76,7 @@ export function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-            <LayoutDashboard className="h-6 w-6 text-white" />
+            <LayoutDashboard className="h-6 w-6 text-on-accent" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">

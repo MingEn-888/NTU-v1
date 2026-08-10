@@ -112,7 +112,7 @@ export function ExecutionTimeline({
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-            <Route className="h-5 w-5 text-white" />
+            <Route className="h-5 w-5 text-on-accent" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export function ExecutionTimeline({
                       <span
                         className={cn(
                           "h-5 w-5 rounded-lg flex items-center justify-center text-[10px] font-extrabold",
-                          active ? "bg-gradient-to-br from-brand-500 to-brand-accent text-white" : "bg-white/10 text-gray-400"
+                          active ? "bg-gradient-to-br from-brand-500 to-brand-accent text-on-accent" : "bg-white/10 text-gray-400"
                         )}
                       >
                         {String.fromCharCode(65 + idx)}

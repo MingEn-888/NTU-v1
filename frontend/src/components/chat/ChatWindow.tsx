@@ -632,7 +632,7 @@ function EmptyState({ businessName }: { businessName?: string }) {
     <div className="flex flex-col items-center justify-center py-10 text-center px-6">
       <div className="relative mb-5">
         <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-          <MessageSquareText className="h-8 w-8 text-white" />
+          <MessageSquareText className="h-8 w-8 text-on-accent" />
         </div>
         <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 border-2 border-[#08090d] animate-pulse" />
       </div>

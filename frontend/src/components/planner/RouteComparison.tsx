@@ -237,6 +237,18 @@ export function RouteComparison({
   const recommended = routes.find((r) => r.isRecommended) ?? routes[0];
   const hasFeasible = routes.some((r) => !r.infeasible);
 
+  // Gas-saving / speed leaders for the optimisation badges.
+  const feasible = routes.filter((r) => !r.infeasible);
+  const cheapest = useMemo(() => {
+    if (!feasible.length) return undefined;
+    return feasible.reduce((a, b) => (b.estimatedGas < a.estimatedGas ? b : a));
+  }, [feasible]);
+  const fastest = useMemo(() => {
+    if (!feasible.length) return undefined;
+    return feasible.reduce((a, b) => (b.estimatedDuration < a.estimatedDuration ? b : a));
+  }, [feasible]);
+  const maxGas = useMemo(() => Math.max(...routes.map((r) => r.estimatedGas), 0.001), [routes]);
+
   const reRun = () => {
     setLocalError(null);
     if (plans && plans.length) {
@@ -251,8 +263,8 @@ export function RouteComparison({
       {/* ------------------------- Header ------------------------- */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-            <Route className="h-5 w-5 text-white" />
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-600 via-brand-accent to-mint-300 flex items-center justify-center shadow-glow">
+            <Route className="h-5 w-5 text-on-accent" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -339,20 +351,31 @@ export function RouteComparison({
       {/* ------------------------- Recommended banner ------------------------- */}
       {!loading && !error && recommended && !recommended.infeasible && (
         <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 flex items-start gap-3">
-          <div className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-400/70 flex items-center justify-center shadow-glow">
-            <Crown className="h-4.5 w-4.5 text-white" />
+          <div className="h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-mint-300 flex items-center justify-center shadow-glow">
+            <Crown className="h-4.5 w-4.5 text-on-accent" />
           </div>
-          <div className="min-w-0">
-            <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-300">
-              Recommended route
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-300">
+                Recommended route
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-brand-500/20 border border-brand-500/40 text-brand-200 text-[9px] font-extrabold uppercase tracking-wider">
+                <Sparkles className="h-2.5 w-2.5" /> Optimized
+              </span>
             </div>
-            <p className="text-sm font-bold text-white mt-0.5">
+            <p className="text-sm font-bold text-gray-100 mt-0.5">
               {recommended.name}
               <span className="ml-2 text-[10px] font-mono font-normal text-emerald-300/80">
                 score {recommended.normalizedScore.toFixed(3)}
               </span>
             </p>
             <p className="text-xs text-gray-300 mt-1 leading-relaxed">{recommended.recommendationReason}</p>
+            {recommended.estimatedSavings > 0 && (
+              <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold">
+                <TrendingDown className="h-3.5 w-3.5" />
+                Saves {formatGas(recommended.estimatedSavings)} vs highest-gas route
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -409,7 +432,7 @@ export function RouteComparison({
                           className={cn(
                             "mt-0.5 h-5 w-5 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-extrabold",
                             isRec
-                              ? "bg-gradient-to-br from-emerald-500 to-emerald-400 text-white"
+                              ? "bg-gradient-to-br from-emerald-500 to-mint-300 text-on-accent"
                               : "bg-white/10 text-gray-400"
                           )}
                         >
@@ -417,10 +440,25 @@ export function RouteComparison({
                         </span>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={cn("text-xs font-bold", isRec ? "text-emerald-200" : "text-white")}>
+                            <span className={cn("text-xs font-bold", isRec ? "text-emerald-200" : "text-gray-100")}>
                               {route.name}
                             </span>
                             {isRec && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 animate-step-pop" />}
+                            {isRec && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-brand-500/20 border border-brand-500/40 text-brand-200 text-[8px] font-extrabold uppercase tracking-wider">
+                                <Sparkles className="h-2.5 w-2.5" /> Optimized
+                              </span>
+                            )}
+                            {!isRec && cheapest && route.routeId === cheapest.routeId && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-mint-300/15 border border-mint-300/40 text-mint-300 text-[8px] font-extrabold uppercase tracking-wider">
+                                <Fuel className="h-2.5 w-2.5" /> Cheapest gas
+                              </span>
+                            )}
+                            {!isRec && fastest && route.routeId === fastest.routeId && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-brand-cyan/15 border border-brand-cyan/40 text-brand-cyan text-[8px] font-extrabold uppercase tracking-wider">
+                                <Clock className="h-2.5 w-2.5" /> Fastest
+                              </span>
+                            )}
                             {route.infeasible && (
                               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-red-500/15 border border-red-500/40 text-[9px] font-bold text-red-300">
                                 <ShieldCheck className="h-2.5 w-2.5" /> UNFUNDED
@@ -489,12 +527,17 @@ export function RouteComparison({
                       )}
                     </td>
 
-                    {/* Savings */}
+                    {/* Savings — gas-saving indicator */}
                     <td className="py-3 pr-3">
                       {route.estimatedSavings > 0 ? (
-                        <div className="flex items-center gap-1 text-xs font-bold text-emerald-300">
-                          <TrendingDown className="h-3 w-3" />
-                          {formatGas(route.estimatedSavings)}
+                        <div>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold shadow-glow-emerald">
+                            <TrendingDown className="h-3 w-3" />
+                            {formatGas(route.estimatedSavings)}
+                          </span>
+                          <div className="mt-1 text-[9px] text-emerald-300/70">
+                            {Math.round((1 - route.estimatedGas / maxGas) * 100)}% less gas
+                          </div>
                         </div>
                       ) : (
                         <span className="text-xs text-gray-600">—</span>

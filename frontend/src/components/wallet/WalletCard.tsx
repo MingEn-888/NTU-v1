@@ -171,7 +171,7 @@ export default function WalletCard({
                 <button
                   onClick={handleAssociate}
                   disabled={isSyncing}
-                  className="px-3 py-1 rounded bg-brand-500 text-white text-xs font-semibold hover:bg-brand-600 disabled:opacity-50 transition-all shadow-glow"
+                  className="px-3 py-1 rounded bg-brand-500 text-on-accent text-xs font-semibold hover:bg-brand-600 disabled:opacity-50 transition-all shadow-glow"
                 >
                   {isSyncing ? "Syncing..." : "Sync Wallet"}
                 </button>
@@ -203,7 +203,7 @@ export default function WalletCard({
           <button
             onClick={handleConnect}
             disabled={isConnecting}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-cyan text-white text-sm font-bold shadow-glow hover:shadow-glow-cyan disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-cyan text-on-accent text-sm font-bold shadow-glow hover:shadow-glow-cyan disabled:opacity-50 transition-all flex items-center justify-center gap-2"
           >
             {isConnecting ? (
               <>
