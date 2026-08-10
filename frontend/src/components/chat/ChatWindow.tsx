@@ -2,10 +2,10 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Landmark, Wallet, MessageSquareText, Inbox } from "lucide-react";
-import type { ChatMessage as ChatMessageModel, OperationStage } from "@/lib/payment/types";
+import type { ChatMessage as ChatMessageModel, OperationStage, PaymentPlan } from "@/lib/payment/types";
 import { ChatMessage, type ExecutionResult } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { resolveTokenAddress, buildExplorerUrl } from "@/lib/payment/execution";
+import { buildExplorerUrl } from "@/lib/payment/execution";
 import { parsePaymentIntent } from "@/lib/payment/intentParser";
 import { generatePaymentPlan } from "@/lib/payment/planGenerator";
 import {
@@ -13,6 +13,11 @@ import {
   buildClarificationNarration,
   buildPlanNarration,
 } from "@/lib/payment/agent";
+import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
+import type { ExecutionOutcome, ExecutionPlan } from "@/lib/execution/types";
+import { ExecutionError } from "@/lib/execution/types";
+import { buildExecutionPlan } from "@/lib/execution/execution";
+import { getSmartWalletDeployment } from "@/lib/execution/abi";
 
 // ---------------------------------------------------------------------------
 // Wallet surface needed by the agent (subset of useWallet)
@@ -25,6 +30,8 @@ export interface ChatWalletApi {
   connect: () => Promise<void>;
   executePayment: (to: string, amount: string, tokenAddress?: string) => Promise<any>;
   executeSmartWalletBatch: (intentId: string, recipient: string, steps: any[]) => Promise<any>;
+  /** Phase 10 — execute an APPROVED plan through the Phase 9 SmartWallet. */
+  executeSmartWalletPlan: (plan: ExecutionPlan) => Promise<ExecutionOutcome>;
 }
 
 interface ChatWindowProps {
@@ -32,6 +39,8 @@ interface ChatWindowProps {
   businessName?: string;
   wallet: ChatWalletApi;
   onOperationStageChange?: (stage: OperationStage) => void;
+  /** Treasury context (assets / chains / gas) fed to the Phase 8 risk engine. */
+  simulationContext?: SimulationTreasuryLike | null;
 }
 
 const SUGGESTIONS = [
@@ -41,8 +50,6 @@ const SUGGESTIONS = [
   "Reimburse Priya $450 for travel expenses.",
   "Send 500 USDC to David for equipment supplies.",
 ];
-
-const FALLBACK_RECIPIENT = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
 async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promise<any> {
   const controller = new AbortController();
@@ -68,13 +75,15 @@ async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promi
   }
 }
 
-export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange }: ChatWindowProps) {
+export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [sending, setSending] = useState(false);
   const [generatingPlanMsgId, setGeneratingPlanMsgId] = useState<string | null>(null);
   const [executingMsgId, setExecutingMsgId] = useState<string | null>(null);
   const [executionResults, setExecutionResults] = useState<Record<string, ExecutionResult>>({});
+  // Phase 10 — validated execution plans per message (built at the approval gate).
+  const [executionPlans, setExecutionPlans] = useState<Record<string, ExecutionPlan>>({});
   const [notice, setNotice] = useState<string | null>(null);
   const [offlineMode, setOfflineMode] = useState(false);
 
@@ -290,6 +299,25 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
               : m
           )
         );
+        // Phase 10 — audit the deterministic plan creation + route selection.
+        const plan = (data.plan as PaymentPlan | undefined) ?? msg.plan;
+        const recommended = plan?.routes?.find((r) => r.isRecommended) ?? plan?.routes?.[0];
+        try {
+          await apiJson("/api/execution", {
+            method: "POST",
+            body: JSON.stringify({
+              action: "PLAN_CREATED",
+              businessId,
+              paymentRequestId: msg.entityIds.paymentRequestId,
+              paymentPlanId: data.entityIds?.planId ?? msg.entityIds?.planId ?? null,
+              routeId: recommended?.id,
+              routeName: recommended?.routeName,
+              savingsUsd: plan?.savings ?? recommended?.savings ?? null,
+            }),
+          });
+        } catch (auditErr) {
+          console.warn("Failed to record PLAN_CREATED audit:", auditErr);
+        }
         onOperationStageChange?.("payment_plan");
       } catch (err: any) {
         markOffline();
@@ -301,13 +329,13 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     [businessId, onOperationStageChange, offlineMode, localProcessPlan, markOffline]
   );
 
-  // --- Approve & execute ------------------------------------------------------
+  // --- Approve & execute (Phase 10: SmartWallet) -----------------------------
   const handleApprove = useCallback(
     async (msg: ChatMessageModel) => {
-      if (!businessId || !msg.intent || !msg.plan || !msg.entityIds || executingMsgId) return;
+      if (!businessId || !msg.intent || !msg.plan || executingMsgId) return;
 
       if (!wallet.isConnected) {
-        setNotice("Connect your wallet to authorise treasury payouts, then tap Approve & Execute again.");
+        setNotice("Connect your wallet to authorise treasury payouts, then tap Approve & Exec again.");
         await wallet.connect();
         return;
       }
@@ -316,57 +344,153 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
       setNotice(null);
       onOperationStageChange?.("executing");
 
-      const recipient = msg.intent.recipientAddress || FALLBACK_RECIPIENT;
-      const amount = msg.plan.settlementAmount.toString();
-      const tokenAddress = resolveTokenAddress(wallet.chainId, msg.plan.settlementAsset);
+      const chainId = wallet.chainId;
+      const paymentRequestId = msg.entityIds?.paymentRequestId ?? `offline-${msg.id}`;
+      const paymentPlanId = msg.entityIds?.planId ?? null;
 
+      const recordFail = async (code: string, message: string, txHash?: string | null) => {
+        try {
+          await apiJson("/api/execution", {
+            method: "POST",
+            body: JSON.stringify({
+              action: "FAIL",
+              businessId,
+              paymentRequestId,
+              paymentPlanId,
+              txHash: txHash ?? null,
+              chainId,
+              errorCode: code,
+              errorMessage: message,
+            }),
+          });
+        } catch (logErr) {
+          console.warn("Failed to persist execution failure:", logErr);
+        }
+      };
+
+      // 1. The SmartWallet must be deployed on the active chain.
+      const deployment = chainId ? getSmartWalletDeployment(chainId) : null;
+      if (!deployment || !chainId) {
+        const execErr = new ExecutionError(
+          "NOT_DEPLOYED",
+          `SmartWallet is not deployed on chain ${chainId ?? "unknown"}. Run the Phase 9 deploy script first.`
+        );
+        await recordFail(execErr.code, execErr.message);
+        setExecutionResults((prev) => ({ ...prev, [msg.id]: { status: "failed", error: execErr.message } }));
+        onOperationStageChange?.("approval");
+        setExecutingMsgId(null);
+        return;
+      }
+
+      // 2. Build the deterministic, validated execution plan from the approved
+      //    intent + plan. This is the ONLY thing the SmartWallet will run.
+      const recommended = msg.plan.routes.find((r) => r.isRecommended) ?? msg.plan.routes[0];
+      const executionPlan = buildExecutionPlan({
+        paymentRequestId,
+        paymentPlanId,
+        routeId: recommended?.id,
+        intent: msg.intent,
+        plan: msg.plan,
+        chainId,
+        smartWalletAddress: deployment.smartWallet,
+        sourceLabel: "chat",
+      });
+      setExecutionPlans((prev) => ({ ...prev, [msg.id]: executionPlan }));
+
+      // 3. Persist the deterministic risk evaluation + explicit approval
+      //    (best-effort — the on-chain tx is the source of truth).
       try {
-        // Real on-chain execution — MetaMask shows a confirmation prompt.
-        const receipt = await wallet.executePayment(recipient, amount, tokenAddress || undefined);
-        const txHash = receipt?.hash || receipt?.transactionHash || "";
-        const explorerUrl = txHash ? buildExplorerUrl(wallet.chainId, txHash) : null;
+        await apiJson("/api/execution", {
+          method: "POST",
+          body: JSON.stringify({
+            action: "RISK_CHECKED",
+            businessId,
+            paymentRequestId,
+            paymentPlanId,
+            riskLevel: msg.plan.risk.overallRisk,
+          }),
+        });
+      } catch (logErr) {
+        console.warn("Failed to record RISK_CHECKED audit:", logErr);
+      }
+      try {
+        await apiJson("/api/execution", {
+          method: "POST",
+          body: JSON.stringify({
+            action: "APPROVE",
+            businessId,
+            paymentRequestId,
+            paymentPlanId,
+            approvedByAddress: wallet.address,
+            riskLevel: msg.plan.risk.overallRisk,
+          }),
+        });
+      } catch (logErr) {
+        console.warn("Failed to persist approval:", logErr);
+      }
 
-        // Record the on-chain result (non-fatal — the txn already succeeded).
+      // 4. Broadcast through the SmartWallet (SUBMITTED -> CONFIRMED).
+      try {
+        const outcome = await wallet.executeSmartWalletPlan(executionPlan);
+        const txHash = outcome.txHash;
+        const explorerUrl = outcome.explorerUrl || buildExplorerUrl(chainId, txHash) || undefined;
+
+        // Record SUBMITTED (hash known, awaiting confirmation).
         try {
-          await apiJson("/api/chat/execute", {
+          await apiJson("/api/execution", {
             method: "POST",
             body: JSON.stringify({
+              action: "SUBMIT",
               businessId,
-              paymentRequestId: msg.entityIds.paymentRequestId,
+              paymentRequestId,
+              paymentPlanId,
               txHash,
-              chainId: wallet.chainId,
-              explorerUrl,
-              gasUsed: receipt?.gasUsed?.toString?.() || 0,
+              chainId,
+              smartWalletAddress: deployment.smartWallet,
+              executionPlanId: executionPlan.id,
             }),
           });
         } catch (logErr) {
-          console.error("Failed to persist execution result:", logErr);
+          console.warn("Failed to persist SUBMITTED txn:", logErr);
         }
 
         setExecutionResults((prev) => ({
           ...prev,
-          [msg.id]: { status: "complete", txHash, explorerUrl: explorerUrl || undefined },
+          [msg.id]: { status: "complete", txHash, explorerUrl },
         }));
-        onOperationStageChange?.("complete");
-      } catch (err: any) {
-        const errorMessage = err?.message || "Transaction rejected in wallet. No funds moved.";
+
+        // Record CONFIRMED (gas used / cost / explorer URL).
         try {
-          await apiJson("/api/chat/execute", {
+          await apiJson("/api/execution", {
             method: "POST",
             body: JSON.stringify({
+              action: "CONFIRM",
               businessId,
-              paymentRequestId: msg.entityIds.paymentRequestId,
-              failed: true,
-              chainId: wallet.chainId,
-              errorMessage,
+              paymentRequestId,
+              paymentPlanId,
+              txHash,
+              chainId,
+              gasUsed: outcome.gasUsed,
+              gasCostUsd: outcome.gasCostUsd,
+              explorerUrl,
             }),
           });
         } catch (logErr) {
-          console.error("Failed to log execution failure:", logErr);
+          console.warn("Failed to persist CONFIRMED txn:", logErr);
         }
+
+        onOperationStageChange?.("complete");
+      } catch (err: unknown) {
+        // 5. Typed error handling: rejected / insufficient balance / RPC
+        //    timeout / contract revert / wrong network / disconnected.
+        const execErr =
+          err instanceof ExecutionError
+            ? err
+            : new ExecutionError("UNKNOWN", err instanceof Error ? err.message : "Execution failed.");
+        await recordFail(execErr.code, execErr.message);
         setExecutionResults((prev) => ({
           ...prev,
-          [msg.id]: { status: "failed", error: errorMessage },
+          [msg.id]: { status: "failed", error: execErr.message },
         }));
         onOperationStageChange?.("approval");
       } finally {
@@ -376,17 +500,19 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     [businessId, wallet, executingMsgId, onOperationStageChange]
   );
 
-  // --- Reject ------------------------------------------------------------------
+  // --- Reject (Phase 10) -------------------------------------------------------
   const handleReject = useCallback(
     async (msg: ChatMessageModel) => {
-      if (!businessId || !msg.entityIds) return;
+      if (!businessId) return;
+      const paymentRequestId = msg.entityIds?.paymentRequestId ?? `offline-${msg.id}`;
       try {
-        await apiJson("/api/chat/execute", {
+        await apiJson("/api/execution", {
           method: "POST",
           body: JSON.stringify({
+            action: "REJECT",
             businessId,
-            paymentRequestId: msg.entityIds.paymentRequestId,
-            cancelled: true,
+            paymentRequestId,
+            rejectionReason: "Rejected by operator at the Phase 10 approval gate.",
           }),
         });
       } catch (err) {
@@ -455,6 +581,8 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
             onApprove={handleApprove}
             onReject={handleReject}
             txResult={executionResults[m.id] || null}
+            simulationContext={simulationContext}
+            executionPlan={executionPlans[m.id] || null}
           />
         ))}
 

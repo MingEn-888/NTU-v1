@@ -1,4 +1,5 @@
 {
+  // rootDir explicitly set so outDir layout is deterministic (TS 5.9+).
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
@@ -11,7 +12,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "./types"
   },
   "include": ["types/**/*"]
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   User,
   Landmark,
@@ -21,6 +21,13 @@ import {
 } from "lucide-react";
 import type { ParsedPaymentIntent, PaymentPlan, PaymentStep, RiskAssessment } from "@/lib/payment/types";
 import { currencySymbol } from "@/lib/payment/planGenerator";
+import { RiskSimulationPanel } from "@/components/risk/RiskSimulationPanel";
+import { simulationRequestFromPlan } from "@/lib/risk/adapter";
+import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
+import type { SimulationResult } from "@/lib/risk/types";
+import type { ExecutionPlan } from "@/lib/execution/types";
+import { ApprovalPanel } from "@/components/execution/ApprovalPanel";
+import { ExecutionFlowTimeline, type ExecutionFlowStage } from "@/components/execution/ExecutionFlowTimeline";
 
 export type PaymentCardPhase = "detected" | "plan" | "executing" | "complete" | "failed";
 
@@ -35,6 +42,10 @@ interface PaymentRequestCardProps {
   txHash?: string | null;
   explorerUrl?: string | null;
   error?: string | null;
+  /** Treasury context (assets / chains / gas) used by the Phase 8 risk engine. */
+  simulationContext?: SimulationTreasuryLike | null;
+  /** Phase 10 — validated execution plan ready for the explicit approval gate. */
+  executionPlan?: ExecutionPlan | null;
 }
 
 const PHASE_META: Record<PaymentCardPhase, { label: string; className: string; dot: string }> = {
@@ -116,8 +127,43 @@ export default function PaymentRequestCard({
   txHash,
   explorerUrl,
   error,
+  simulationContext,
+  executionPlan,
 }: PaymentRequestCardProps) {
   const meta = PHASE_META[phase];
+
+  // Phase 8 — build the normalized simulation request from the intent + plan.
+  const simRequest = useMemo(() => {
+    if (!plan) return null;
+    return simulationRequestFromPlan(intent, plan, simulationContext);
+  }, [intent, plan, simulationContext]);
+
+  // Phase 8 — the RiskSimulationPanel evaluates the request and reports the
+  // result upward (onResultChange) so the SAME SimulationResult feeds the
+  // Phase 10 approval panel (risk score + AI explanation).
+  const [simulation, setSimulation] = useState<SimulationResult | null>(null);
+  useEffect(() => {
+    setSimulation(null);
+  }, [JSON.stringify(simRequest)]);
+
+  // Phase 10 — explicit approval gate state. "Confirm & Sign" on the risk panel
+  // arms this; the ApprovalPanel then requires [Approve & exec] / [Reject].
+  const [approvalArmed, setApprovalArmed] = useState(false);
+  useEffect(() => {
+    setApprovalArmed(false);
+  }, [plan, phase]);
+
+  // Derive the execution timeline stage from the card phase + approval state.
+  const timelineStage: ExecutionFlowStage =
+    phase === "complete"
+      ? "confirmed"
+      : phase === "failed" || phase === "executing"
+      ? "executing"
+      : approvalArmed
+      ? "approved"
+      : phase === "plan"
+      ? "risk_checked"
+      : "understood";
 
   const amountText =
     intent.amount !== null && intent.currency
@@ -247,6 +293,15 @@ export default function PaymentRequestCard({
         {/* PLAN SECTION */}
         {plan && phase !== "detected" && (
           <div className="space-y-4 border-t border-white/10 pt-4">
+            {/* Phase 10 — full execution timeline (understood → confirmed). */}
+            <ExecutionFlowTimeline
+              stage={timelineStage}
+              failed={phase === "failed"}
+              error={error}
+              txHash={txHash}
+              explorerUrl={explorerUrl}
+            />
+
             {/* Settlement summary */}
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2 text-[12px] text-gray-300">
@@ -309,6 +364,35 @@ export default function PaymentRequestCard({
             <p className="text-[11px] text-gray-400 leading-relaxed bg-black/25 border border-white/5 rounded-xl p-3">
               {plan.explanation}
             </p>
+
+            {/* Phase 8 — Risk evaluation & simulation BEFORE approval. The
+                engine never auto-executes: the human must Review Payment, then
+                Confirm & Sign, and finally Approve & exec in the Phase 10 gate. */}
+            {phase === "plan" && simRequest && (
+              <>
+                <RiskSimulationPanel
+                  request={simRequest}
+                  onResultChange={setSimulation}
+                  onReview={approvalArmed ? undefined : () => setApprovalArmed(true)}
+                  onReject={approvalArmed ? undefined : onReject}
+                />
+
+                {/* Phase 10 — explicit human approval interface. Nothing is sent
+                    to the SmartWallet until [Approve & exec] is pressed. */}
+                {approvalArmed && executionPlan && (
+                  <ApprovalPanel
+                    plan={executionPlan}
+                    simulation={simulation}
+                    approving={false}
+                    onApprove={() => {
+                      setApprovalArmed(false);
+                      onApprove?.();
+                    }}
+                    onReject={onReject}
+                  />
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -373,24 +457,8 @@ export default function PaymentRequestCard({
           </button>
         )}
 
-        {phase === "plan" && (
-          <div className="flex gap-2">
-            <button
-              onClick={onReject}
-              disabled={false}
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-[12px] font-bold transition-all"
-            >
-              Reject
-            </button>
-            <button
-              onClick={onApprove}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 transition-all"
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Approve & Execute
-            </button>
-          </div>
-        )}
+        {/* Phase 8 — approval is now handled by the RiskSimulationPanel above:
+            Review Payment -> Confirm & Sign (explicit human approval, no auto-exec). */}
       </div>
     </div>
   );

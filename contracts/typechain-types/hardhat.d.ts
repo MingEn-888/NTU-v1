@@ -17,23 +17,95 @@ declare module "hardhat/types/runtime" {
       name: "IntentRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IntentRouter__factory>;
+    getContractFactory(
+      name: "MockERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockERC20__factory>;
+    getContractFactory(
+      name: "ReentrancyAttacker",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ReentrancyAttacker__factory>;
+    getContractFactory(
+      name: "IERC20Minimal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Minimal__factory>;
+    getContractFactory(
+      name: "SmartWallet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SmartWallet__factory>;
 
     getContractAt(
       name: "IntentRouter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IntentRouter>;
+    getContractAt(
+      name: "MockERC20",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockERC20>;
+    getContractAt(
+      name: "ReentrancyAttacker",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ReentrancyAttacker>;
+    getContractAt(
+      name: "IERC20Minimal",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Minimal>;
+    getContractAt(
+      name: "SmartWallet",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SmartWallet>;
 
     deployContract(
       name: "IntentRouter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IntentRouter>;
+    deployContract(
+      name: "MockERC20",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockERC20>;
+    deployContract(
+      name: "ReentrancyAttacker",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyAttacker>;
+    deployContract(
+      name: "IERC20Minimal",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Minimal>;
+    deployContract(
+      name: "SmartWallet",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SmartWallet>;
 
     deployContract(
       name: "IntentRouter",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IntentRouter>;
+    deployContract(
+      name: "MockERC20",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockERC20>;
+    deployContract(
+      name: "ReentrancyAttacker",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyAttacker>;
+    deployContract(
+      name: "IERC20Minimal",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Minimal>;
+    deployContract(
+      name: "SmartWallet",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SmartWallet>;
 
     // default types
     getContractFactory(
