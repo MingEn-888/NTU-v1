@@ -95,7 +95,7 @@ export function ApprovalPanel({
       {/* ------------------------- Header ------------------------- */}
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-brand-accent flex items-center justify-center shadow-glow">
-          <Lock className="h-5 w-5 text-white" />
+          <Lock className="h-5 w-5 text-on-accent" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -253,7 +253,7 @@ export function ApprovalPanel({
         <button
           onClick={onApprove}
           disabled={approving || disabled}
-          className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-on-accent text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           {approving ? (
             <>

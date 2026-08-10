@@ -47,7 +47,7 @@ export function ChatMessage({
     return (
       <div className="flex justify-end gap-3">
         <div className="max-w-[82%]">
-          <div className="px-4 py-3 rounded-2xl rounded-br-md bg-gradient-to-br from-brand-600/80 to-brand-accent/80 border border-brand-500/30 text-[13px] text-white leading-relaxed shadow-glass">
+          <div className="px-4 py-3 rounded-2xl rounded-br-md bg-gradient-to-br from-brand-600/80 to-brand-accent/80 border border-brand-500/30 text-[13px] text-on-accent leading-relaxed shadow-glass">
             {message.content}
           </div>
           <div className="mt-1 text-right text-[10px] text-gray-600 font-medium">
@@ -55,7 +55,7 @@ export function ChatMessage({
           </div>
         </div>
         <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-500 to-brand-accent border border-white/10 flex items-center justify-center shrink-0 shadow-glow">
-          <User className="h-4 w-4 text-white" />
+          <User className="h-4 w-4 text-on-accent" />
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ export function ChatMessage({
   return (
     <div className="flex gap-3">
       <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-cyan to-brand-500 border border-white/10 flex items-center justify-center shrink-0 shadow-glow-cyan">
-        <Bot className="h-4 w-4 text-white" />
+        <Bot className="h-4 w-4 text-on-accent" />
       </div>
 
       <div className="max-w-[85%] min-w-0 flex-1">

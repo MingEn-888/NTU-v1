@@ -198,6 +198,56 @@ export function ExecutionFlowTimeline({
           );
         })}
       </div>
+
+      {/* Transfer Successful — confirmation panel */}
+      {stage === "confirmed" && !failed && (
+        <div className="mt-2 rounded-xl bg-gradient-to-br from-emerald-500/15 to-mint-300/10 border border-emerald-500/30 p-4 animate-step-pop">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-mint-300 flex items-center justify-center shadow-glow-emerald">
+              <CheckCircle2 className="h-6 w-6 text-on-accent" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[13px] font-extrabold text-emerald-300 tracking-tight">
+                Transfer Successful
+              </div>
+              <div className="text-[11px] text-gray-400">
+                Payment settled on-chain · SmartWallet · human-approved
+              </div>
+            </div>
+            {txHash && (
+              <div className="ml-auto shrink-0">
+                {explorerUrl ? (
+                  <a
+                    href={explorerUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[10px] font-bold text-gray-200 hover:bg-white/20 transition-colors"
+                  >
+                    View on explorer ↗
+                  </a>
+                ) : (
+                  <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/10 text-[10px] font-mono text-gray-300">
+                    {txHash && shortHash(txHash)}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { k: "Status", v: "Confirmed", tone: "text-emerald-300" },
+              { k: "Approval", v: "Human signed", tone: "text-gray-200" },
+              { k: "Layer", v: "SmartWallet", tone: "text-gray-200" },
+              { k: "Audit", v: "Recorded", tone: "text-gray-200" },
+            ].map((c) => (
+              <div key={c.k} className="px-3 py-2 rounded-xl bg-black/20 border border-white/10">
+                <div className="text-[8px] font-bold uppercase tracking-wider text-gray-500">{c.k}</div>
+                <div className={`text-[11px] font-bold ${c.tone}`}>{c.v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

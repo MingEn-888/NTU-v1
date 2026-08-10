@@ -83,7 +83,7 @@ export function SectionErrorState({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[12px] font-bold text-white bg-brand-600 hover:bg-brand-500 transition-colors"
+          className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-[12px] font-bold text-on-accent bg-brand-600 hover:bg-brand-500 transition-colors"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry

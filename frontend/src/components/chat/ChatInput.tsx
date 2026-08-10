@@ -79,7 +79,7 @@ export function ChatInput({
         <button
           onClick={submit}
           disabled={disabled || !value.trim()}
-          className="absolute right-2 bottom-2 h-10 w-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-500 text-white flex items-center justify-center shadow-glow disabled:opacity-40 disabled:hover:from-brand-600 disabled:hover:to-brand-accent transition-all"
+          className="absolute right-2 bottom-2 h-10 w-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-500 text-on-accent flex items-center justify-center shadow-glow disabled:opacity-40 disabled:hover:from-brand-600 disabled:hover:to-brand-accent transition-all"
           aria-label="Send message"
         >
           {disabled ? (

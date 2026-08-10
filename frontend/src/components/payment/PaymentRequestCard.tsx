@@ -440,7 +440,7 @@ export default function PaymentRequestCard({
           <button
             onClick={onGeneratePlan}
             disabled={generatingPlan}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-500 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 transition-all"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-500 text-on-accent text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 transition-all"
           >
             {generatingPlan ? (
               <>

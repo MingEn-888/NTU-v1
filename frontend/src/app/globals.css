@@ -2,14 +2,277 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-bg: #08090d;
-  --color-card-bg: rgba(18, 20, 29, 0.7);
-  --color-card-border: rgba(255, 255, 255, 0.08);
+/* ============================================================================
+   PayMaster Design System — Light / Dark / System theme engine.
+   Palette: #000000 #240248 #47038F #5603AD #8367C7 #B3E9C7 #BBF1C9 #C2F8CB #F0FFF1
+   All colours are RGB-triplet CSS variables consumed by tailwind.config.ts
+   (rgb(var(--x) / <alpha-value>)) and by the unlayered utility overrides below.
+   ============================================================================ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ---- Surfaces ---- */
+  --c-bg: 0 0 0; /* #000000 */
+  --c-bg-2: 36 2 72; /* #240248 */
+  --c-bg-3: 71 3 143; /* #47038F */
+  --c-surface: 36 2 72; /* purple glass base */
+  --c-surface-2: 71 3 143;
+  --c-surface-3: 86 3 173;
+  --c-inset: 0 0 0;
+  --c-input: 36 2 72;
+  --c-agent: 24 8 48;
+  --c-approval-from: 26 21 32;
+  --c-approval-to: 13 15 28;
+
+  /* ---- Text ---- */
+  --c-fg: 240 255 241; /* #F0FFF1 */
+  --c-fg-2: 218 236 223;
+  --c-fg-muted: 183 197 207;
+  --c-fg-subtle: 140 156 168;
+  --c-on-accent: 240 255 241;
+
+  /* ---- Borders / shadows ---- */
+  --c-border: 131 103 199; /* #8367C7 */
+  --c-border-strong: 179 233 199; /* #B3E9C7 */
+  --c-shadow: 0 0 0;
+
+  /* ---- Brand (purple → mint) ---- */
+  --c-brand-50: 245 237 255;
+  --c-brand-100: 235 221 255;
+  --c-brand-200: 214 194 251;
+  --c-brand-300: 185 162 240;
+  --c-brand-400: 155 127 224;
+  --c-brand-500: 131 103 199; /* #8367C7 */
+  --c-brand-600: 86 3 173; /* #5603AD */
+  --c-brand-700: 71 3 143; /* #47038F */
+  --c-brand-accent: 86 3 173;
+  --c-brand-emerald: 179 233 199;
+  --c-brand-cyan: 179 233 199; /* #B3E9C7 */
+
+  /* ---- Mint scale ---- */
+  --c-mint-50: 240 255 241;
+  --c-mint-100: 222 244 226;
+  --c-mint-200: 194 248 203; /* #C2F8CB */
+  --c-mint-300: 187 241 201; /* #BBF1C9 */
+  --c-mint-400: 179 233 199; /* #B3E9C7 */
+  --c-mint-500: 179 233 199;
+
+  /* ---- Deep purple scale ---- */
+  --c-deep-50: 245 240 250;
+  --c-deep-100: 235 225 245;
+  --c-deep-200: 215 195 235;
+  --c-deep-300: 190 155 220;
+  --c-deep-400: 165 120 205;
+  --c-deep-500: 131 103 199;
+  --c-deep-600: 86 3 173;
+  --c-deep-700: 71 3 143;
+  --c-deep-800: 36 2 72;
+  --c-deep-900: 24 8 48;
+
+  /* ---- Semantic status ---- */
+  --c-success: 187 241 201;
+  --c-success-soft: 187 241 201;
+  --c-success-border: 187 241 201;
+  --c-danger: 252 165 165;
+  --c-danger-soft: 244 63 94;
+  --c-danger-border: 244 63 94;
+  --c-warning: 252 211 77;
+  --c-warning-soft: 245 158 11;
+  --c-warning-border: 245 158 11;
+  --c-info: 179 233 199;
+  --c-info-soft: 6 182 212;
+  --c-info-border: 6 182 212;
+
+  /* ---- Tailwind stock palettes (theme-aware) ---- */
+  --c-emerald-50: 236 253 245;
+  --c-emerald-100: 209 250 229;
+  --c-emerald-200: 167 243 208;
+  --c-emerald-300: 110 231 183;
+  --c-emerald-400: 52 211 153;
+  --c-emerald-500: 16 185 129;
+  --c-emerald-600: 5 150 105;
+  --c-emerald-700: 4 120 87;
+
+  --c-amber-50: 255 251 235;
+  --c-amber-100: 254 243 199;
+  --c-amber-200: 253 230 138;
+  --c-amber-300: 252 211 77;
+  --c-amber-400: 251 191 36;
+  --c-amber-500: 245 158 11;
+  --c-amber-600: 217 119 6;
+  --c-amber-700: 180 83 9;
+
+  --c-red-50: 254 242 242;
+  --c-red-100: 254 226 226;
+  --c-red-200: 254 202 202;
+  --c-red-300: 252 165 165;
+  --c-red-400: 248 113 113;
+  --c-red-500: 239 68 68;
+  --c-red-600: 220 38 38;
+  --c-red-700: 185 28 28;
+  --c-red-800: 153 27 27;
+  --c-red-900: 127 29 29;
+  --c-red-950: 69 10 10;
+
+  --c-rose-100: 255 228 230;
+  --c-rose-200: 254 205 211;
+  --c-rose-300: 253 164 175;
+  --c-rose-400: 251 113 133;
+  --c-rose-500: 244 63 94;
+
+  --c-violet-300: 196 181 253;
+  --c-violet-400: 167 139 250;
+  --c-violet-500: 139 92 246;
+
+  --c-cyan-100: 207 250 254;
+  --c-cyan-200: 165 243 252;
+  --c-cyan-300: 103 232 249;
+  --c-cyan-400: 34 211 238;
+  --c-cyan-500: 6 182 212;
+
+  --c-orange-300: 253 186 116;
+  --c-orange-400: 251 146 60;
+  --c-orange-500: 249 115 22;
 }
 
+/* ============================================================================
+   LIGHT THEME — pastel mint surfaces, deep purple ink, medium accents.
+   ============================================================================ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* ---- Surfaces (frosted mint / white glass) ---- */
+  --c-bg: 240 255 241; /* #F0FFF1 */
+  --c-bg-2: 255 255 255;
+  --c-bg-3: 187 241 201; /* #BBF1C9 */
+  --c-surface: 247 254 248; /* mint-tinted white */
+  --c-surface-2: 255 255 255;
+  --c-surface-3: 131 103 199;
+  --c-inset: 36 2 72;
+  --c-input: 255 255 255;
+  --c-agent: 255 255 255;
+  --c-approval-from: 253 251 255;
+  --c-approval-to: 247 242 255;
+
+  /* ---- Text (deep purple ink) ---- */
+  --c-fg: 36 2 72; /* #240248 */
+  --c-fg-2: 58 27 110;
+  --c-fg-muted: 91 74 125;
+  --c-fg-subtle: 138 124 165;
+  --c-on-accent: 240 255 241; /* always near-white on coloured fills */
+
+  /* ---- Borders / shadows (soft purple) ---- */
+  --c-border: 36 2 72;
+  --c-border-strong: 86 3 173;
+  --c-shadow: 36 2 72;
+
+  /* ---- Brand: medium purples for text, deep fills keep white glyphs ---- */
+  --c-brand-50: 248 245 255;
+  --c-brand-100: 238 232 252;
+  --c-brand-200: 221 209 245;
+  --c-brand-300: 131 103 199; /* #8367C7 */
+  --c-brand-400: 86 3 173; /* #5603AD */
+  --c-brand-500: 86 3 173;
+  --c-brand-600: 71 3 143; /* #47038F */
+  --c-brand-700: 36 2 72; /* #240248 */
+  --c-brand-accent: 71 3 143;
+  --c-brand-emerald: 16 185 129; /* green accent */
+  --c-brand-cyan: 16 128 82; /* readable green (was purple) */
+
+  /* ---- Mint scale (green ramp) ---- */
+  --c-mint-50: 240 255 241;
+  --c-mint-100: 222 244 226;
+  --c-mint-200: 194 248 203;
+  --c-mint-300: 179 233 199;
+  --c-mint-400: 16 185 129;
+  --c-mint-500: 5 150 105;
+
+  /* ---- Deep purple scale (light ramp) ---- */
+  --c-deep-50: 250 247 255;
+  --c-deep-100: 240 234 252;
+  --c-deep-200: 221 209 245;
+  --c-deep-300: 195 172 232;
+  --c-deep-400: 155 127 224;
+  --c-deep-500: 131 103 199;
+  --c-deep-600: 86 3 173;
+  --c-deep-700: 71 3 143;
+  --c-deep-800: 36 2 72;
+  --c-deep-900: 24 8 48;
+
+  /* ---- Semantic status (medium text tones for light surfaces) ---- */
+  --c-success: 16 128 82;
+  --c-success-soft: 187 241 201;
+  --c-success-border: 16 185 129;
+  --c-danger: 190 18 60;
+  --c-danger-soft: 254 226 226;
+  --c-danger-border: 244 63 94;
+  --c-warning: 180 83 9;
+  --c-warning-soft: 254 243 199;
+  --c-warning-border: 217 119 6;
+  --c-info: 86 3 173;
+  --c-info-soft: 235 221 255;
+  --c-info-border: 131 103 199;
+
+  /* ---- Stock palettes deepened for light-mode text contrast ---- */
+  --c-emerald-50: 236 253 245;
+  --c-emerald-100: 209 250 229;
+  --c-emerald-200: 167 243 208;
+  --c-emerald-300: 16 128 82;
+  --c-emerald-400: 5 150 105;
+  --c-emerald-500: 16 185 129;
+  --c-emerald-600: 5 150 105;
+  --c-emerald-700: 4 120 87;
+
+  --c-amber-50: 255 251 235;
+  --c-amber-100: 254 243 199;
+  --c-amber-200: 253 230 138;
+  --c-amber-300: 146 92 0;
+  --c-amber-400: 180 83 9;
+  --c-amber-500: 245 158 11;
+  --c-amber-600: 217 119 6;
+  --c-amber-700: 180 83 9;
+
+  --c-red-50: 254 242 242;
+  --c-red-100: 254 226 226;
+  --c-red-200: 190 18 60;
+  --c-red-300: 190 18 60;
+  --c-red-400: 220 38 38;
+  --c-red-500: 239 68 68;
+  --c-red-600: 220 38 38;
+  --c-red-700: 185 28 28;
+  --c-red-800: 153 27 27;
+  --c-red-900: 127 29 29;
+  --c-red-950: 254 226 226;
+
+  --c-rose-100: 190 18 60;
+  --c-rose-200: 190 18 60;
+  --c-rose-300: 190 18 60;
+  --c-rose-400: 225 29 72;
+  --c-rose-500: 244 63 94;
+
+  --c-violet-300: 124 58 237;
+  --c-violet-400: 124 58 237;
+  --c-violet-500: 139 92 246;
+
+  --c-cyan-100: 0 131 143;
+  --c-cyan-200: 0 131 143;
+  --c-cyan-300: 0 131 143;
+  --c-cyan-400: 6 148 162;
+  --c-cyan-500: 6 182 212;
+
+  --c-orange-300: 194 65 12;
+  --c-orange-400: 194 65 12;
+  --c-orange-500: 234 88 12;
+}
+
+/* ============================================================================
+   Base
+   ============================================================================ */
+
 * {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgb(var(--c-border) / 0.28);
 }
 
 html {
@@ -17,41 +280,53 @@ html {
 }
 
 body {
-  color: #f3f4f6;
-  background-color: var(--color-bg);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+  color: rgb(var(--c-fg));
+  background-color: rgb(var(--c-bg));
+  background-image:
+    radial-gradient(at 0% 0%, rgb(var(--c-brand-600) / 0.16) 0px, transparent 52%),
+    radial-gradient(at 100% 0%, rgb(var(--c-brand-500) / 0.16) 0px, transparent 52%),
+    radial-gradient(at 55% 110%, rgb(var(--c-mint-300) / 0.12) 0px, transparent 55%);
   background-attachment: fixed;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth theme switching (backgrounds, text, borders, shadows) */
+.theme-transition,
+.theme-transition body,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.35s ease, border-color 0.35s ease,
+    color 0.25s ease, box-shadow 0.35s ease, fill 0.3s ease, stroke 0.3s ease;
 }
 
 /* Focus ring — consistent, accessible keyboard focus across all surfaces */
 :focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.7);
+  outline: 2px solid rgb(var(--c-brand-400) / 0.8);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-/* Custom scrollbars that fit the dark glass theme */
+/* Custom scrollbars that fit the glass theme */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--c-inset) / 0.06);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgb(var(--c-brand-400) / 0.28);
   border-radius: 999px;
-  border: 2px solid rgba(0, 0, 0, 0.3);
+  border: 2px solid rgb(var(--c-bg));
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.4);
+  background: rgb(var(--c-brand-400) / 0.5);
 }
 
 /* Number alignment for financial values */
@@ -64,7 +339,7 @@ body {
   .skeleton {
     position: relative;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(var(--c-brand-400) / 0.08);
     border-radius: 0.5rem;
   }
   .skeleton::after {
@@ -74,7 +349,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.07),
+      rgb(var(--c-fg) / 0.06),
       transparent
     );
     animation: shimmer 1.6s linear infinite;
@@ -93,29 +368,29 @@ body {
     line-height: 1.45;
   }
   .banner-error {
-    background: rgba(244, 63, 94, 0.1);
-    border-color: rgba(244, 63, 94, 0.35);
-    color: #fda4af;
+    background: rgb(var(--c-danger-soft) / 0.9);
+    border-color: rgb(var(--c-danger-border) / 0.4);
+    color: rgb(var(--c-danger));
   }
   .banner-success {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: rgba(16, 185, 129, 0.35);
-    color: #6ee7b7;
+    background: rgb(var(--c-success-soft) / 0.55);
+    border-color: rgb(var(--c-success-border) / 0.4);
+    color: rgb(var(--c-success));
   }
   .banner-warning {
-    background: rgba(245, 158, 11, 0.1);
-    border-color: rgba(245, 158, 11, 0.35);
-    color: #fcd34d;
+    background: rgb(var(--c-warning-soft) / 0.55);
+    border-color: rgb(var(--c-warning-border) / 0.4);
+    color: rgb(var(--c-warning));
   }
   .banner-info {
-    background: rgba(6, 182, 212, 0.1);
-    border-color: rgba(6, 182, 212, 0.35);
-    color: #67e8f9;
+    background: rgb(var(--c-info-soft) / 0.55);
+    border-color: rgb(var(--c-info-border) / 0.4);
+    color: rgb(var(--c-info));
   }
   .banner-neutral {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #d1d5db;
+    background: rgb(var(--c-surface) / 0.3);
+    border-color: rgb(var(--c-border) / 0.35);
+    color: rgb(var(--c-fg-muted));
   }
 
   /* ---- Section / empty-state text ---- */
@@ -126,64 +401,205 @@ body {
 
 @layer utilities {
   .glass-panel {
-    background: rgba(18, 20, 29, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: rgb(var(--c-surface) / 0.5);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgb(var(--c-border) / 0.28);
+    box-shadow: 0 8px 32px 0 rgb(var(--c-shadow) / 0.32);
   }
 
   .glass-card {
-    background: rgba(22, 25, 37, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgb(var(--c-surface-2) / 0.5);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgb(var(--c-border) / 0.22);
     transition: all 0.2s ease-in-out;
   }
 
   .glass-card:hover {
-    background: rgba(30, 34, 50, 0.85);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.15);
+    background: rgb(var(--c-surface-3) / 0.55);
+    border-color: rgb(var(--c-brand-400) / 0.45);
+    box-shadow: 0 0 25px rgb(var(--c-brand-400) / 0.18);
   }
 
   .glass-input {
-    background: rgba(12, 14, 22, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    backdrop-filter: blur(8px);
+    background: rgb(var(--c-input) / 0.85);
+    border: 1px solid rgb(var(--c-border) / 0.3);
+    color: rgb(var(--c-fg));
+    backdrop-filter: blur(10px);
   }
 
   .glass-input:focus {
     outline: none;
-    border-color: rgba(99, 102, 241, 0.6);
-    box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+    border-color: rgb(var(--c-brand-400) / 0.7);
+    box-shadow: 0 0 14px rgb(var(--c-brand-400) / 0.28);
   }
 
   .glass-navbar {
-    background: rgba(8, 9, 13, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgb(var(--c-bg) / 0.62);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border-bottom: 1px solid rgb(var(--c-border) / 0.22);
+  }
+
+  .glass-dropdown {
+    background: rgb(var(--c-bg-2) / 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgb(var(--c-border) / 0.28);
+    box-shadow: 0 16px 48px -8px rgb(var(--c-shadow) / 0.5);
   }
 
   .glow-text {
-    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    text-shadow: 0 0 12px rgb(var(--c-brand-400) / 0.55);
   }
 
   .text-gradient {
-    background-image: linear-gradient(90deg, #818cf8, #a78bfa, #22d3ee);
+    background-image: linear-gradient(90deg, #8367c7, #5603ad, #b3e9c7);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+
+  /* Text that must stay near-white regardless of theme (on coloured fills) */
+  .text-on-accent {
+    color: rgb(var(--c-on-accent));
+  }
+
+  .mint-glow {
+    box-shadow: 0 0 24px rgb(var(--c-mint-300) / 0.45);
+  }
+
+  .mint-glass {
+    background: rgb(var(--c-mint-100) / 0.55);
+    border: 1px solid rgb(var(--c-mint-300) / 0.5);
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Lighter ambient wash for light mode — emphasise the mint/green palette. */
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(at 0% 0%, rgb(86 3 173 / 0.08) 0px, transparent 52%),
+    radial-gradient(at 100% 0%, rgb(16 185 129 / 0.14) 0px, transparent 52%),
+    radial-gradient(at 55% 110%, rgb(179 233 199 / 0.4) 0px, transparent 58%);
+}
+
+/* ============================================================================
+   Unlayered overrides — retrofit the legacy literal dark-theme utilities onto
+   the semantic tokens. Unlayered CSS beats Tailwind's layered utilities, so
+   every `text-white`, `text-gray-*`, `bg-white/*`, `bg-black/*` and
+   `border-white/*` in the codebase now adapts to Light / Dark / System.
+   ============================================================================ */
+
+/* ---- Text ---- */
+.text-white {
+  color: rgb(var(--c-fg));
+}
+.text-gray-100 {
+  color: rgb(var(--c-fg-2));
+}
+.text-gray-200 {
+  color: rgb(var(--c-fg-2));
+}
+.text-gray-300 {
+  color: rgb(var(--c-fg-muted));
+}
+.text-gray-400 {
+  color: rgb(var(--c-fg-muted));
+}
+.text-gray-500 {
+  color: rgb(var(--c-fg-subtle));
+}
+.text-gray-600 {
+  color: rgb(var(--c-fg-subtle));
+}
+.text-gray-700 {
+  color: rgb(var(--c-fg-subtle));
+}
+.placeholder\:text-gray-500::placeholder {
+  color: rgb(var(--c-fg-subtle));
+}
+.placeholder\:text-gray-600::placeholder {
+  color: rgb(var(--c-fg-subtle));
+}
+
+/* ---- Surfaces (subtle white overlays → hover/soft fills) ---- */
+.bg-white\/5,
+.bg-white\/10,
+.bg-white\/7,
+.bg-white\/8,
+.bg-white\/15,
+.bg-white\/20,
+.bg-white\/\[0\.02\],
+.bg-white\/\[0\.03\],
+.bg-white\/\[0\.04\],
+.bg-white\/\[0\.05\],
+.bg-white\/\[0\.06\] {
+  background-color: rgb(var(--c-brand-400) / 0.08);
+}
+.bg-white {
+  background-color: rgb(var(--c-bg-2));
+}
+
+/* ---- Inset surfaces (black overlays → subtle inset) ---- */
+.bg-black\/5,
+.bg-black\/10,
+.bg-black\/15,
+.bg-black\/20,
+.bg-black\/25,
+.bg-black\/30,
+.bg-black\/40,
+.bg-black\/50,
+.bg-black\/60,
+.bg-black\/70 {
+  background-color: rgb(var(--c-inset) / 0.06);
+}
+.bg-black {
+  background-color: rgb(var(--c-inset));
+}
+.bg-red-950\/40,
+.bg-red-950\/30 {
+  background-color: rgb(var(--c-danger-soft) / 0.6);
+}
+
+/* ---- Borders ---- */
+.border-white\/5,
+.border-white\/7,
+.border-white\/8,
+.border-white\/10,
+.border-white\/15 {
+  border-color: rgb(var(--c-border) / 0.3);
+}
+
+/* ---- Literal legacy dark hex surfaces (chat bubble, inputs, approval box) ---- */
+.bg-\[\#12141d\]\/90 {
+  background-color: rgb(var(--c-agent) / 0.92);
+}
+.bg-\[\#0b0d15\] {
+  background-color: rgb(var(--c-input));
+}
+.from-\[\#1a1520\] {
+  --tw-gradient-from: rgb(var(--c-approval-from));
+}
+.to-\[\#0d0f1c\] {
+  --tw-gradient-to: rgb(var(--c-approval-to));
+}
+.from-\[\#151a30\] {
+  --tw-gradient-from: rgb(var(--c-approval-from));
+}
+.from-\[\#14162a\] {
+  --tw-gradient-from: rgb(var(--c-approval-from));
+}
+.border-\[\#08090d\] {
+  border-color: rgb(var(--c-bg));
 }
 
 /* Execution timeline — animated connector for in-progress steps */
 .flow-line-dash {
   background-image: repeating-linear-gradient(
     to bottom,
-    rgba(99, 102, 241, 0.85) 0 5px,
+    rgb(var(--c-brand-400) / 0.85) 0 5px,
     transparent 5px 10px
   );
   animation: flow-dash 0.6s linear infinite;
@@ -200,3 +616,4 @@ body {
     scroll-behavior: auto !important;
   }
 }
+

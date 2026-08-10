@@ -73,7 +73,7 @@ export function AIAgentCommand({ businessName }: { businessName?: string }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-              <Sparkles className="h-5.5 w-5.5 text-white" />
+              <Sparkles className="h-5.5 w-5.5 text-on-accent" />
             </div>
             <div>
               <h2 className="text-[16px] font-extrabold text-white tracking-tight leading-tight">
@@ -116,7 +116,7 @@ export function AIAgentCommand({ businessName }: { businessName?: string }) {
             <button
               onClick={() => submit(value)}
               disabled={!value.trim()}
-              className="absolute right-3 bottom-3 h-11 w-11 rounded-xl bg-gradient-to-br from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-500 text-white flex items-center justify-center shadow-glow transition-all disabled:opacity-40 disabled:shadow-none"
+              className="absolute right-3 bottom-3 h-11 w-11 rounded-xl bg-gradient-to-br from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-500 text-on-accent flex items-center justify-center shadow-glow transition-all disabled:opacity-40 disabled:shadow-none"
               aria-label="Send payment instruction"
             >
               <Send className="h-4.5 w-4.5" />

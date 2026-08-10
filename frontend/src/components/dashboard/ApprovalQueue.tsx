@@ -144,7 +144,7 @@ export function ApprovalQueue({
                 <span className="text-[10px] text-gray-600 font-medium">{timeAgo(a.createdAt)}</span>
                 <button
                   onClick={() => review(a)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11.5px] font-bold text-white bg-gradient-to-r from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-600 transition-colors shadow-glow"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11.5px] font-bold text-on-accent bg-gradient-to-r from-brand-600 to-brand-accent hover:from-brand-500 hover:to-brand-600 transition-colors shadow-glow"
                 >
                   Review
                   <ArrowUpRight className="h-3.5 w-3.5" />

@@ -1,7 +1,16 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * PayMaster design system — premium Web3/DeFi fintech.
+ * Palette: #000000 #240248 #47038F #5603AD #8367C7 #B3E9C7 #BBF1C9 #C2F8CB #F0FFF1
+ *
+ * Every colour is a CSS variable (RGB triplet) so the ENTIRE system flips
+ * between Light / Dark / System themes at runtime. `--c-*` values live in
+ * `globals.css` per `[data-theme="…"]`.
+ */
 const config: Config = {
-  darkMode: "class",
+  // Support both class-based toggling (legacy) and our data-theme attribute.
+  darkMode: ["class", "[data-theme='dark']"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,62 +21,170 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#08090d",
-        foreground: "#f3f4f6",
+        background: "rgb(var(--c-bg) / <alpha-value>)",
+        foreground: "rgb(var(--c-fg) / <alpha-value>)",
         card: {
-          DEFAULT: "rgba(18, 20, 29, 0.75)",
-          hover: "rgba(26, 29, 43, 0.85)",
-          border: "rgba(255, 255, 255, 0.08)",
+          DEFAULT: "rgb(var(--c-surface-2) / <alpha-value>)",
+          hover: "rgb(var(--c-surface-3) / <alpha-value>)",
+          border: "rgb(var(--c-border) / <alpha-value>)",
         },
+        // Brand — purple→mint scale, theme-aware.
         brand: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          accent: "#8b5cf6",
-          emerald: "#10b981",
-          cyan: "#06b6d4",
+          50: "rgb(var(--c-brand-50) / <alpha-value>)",
+          100: "rgb(var(--c-brand-100) / <alpha-value>)",
+          200: "rgb(var(--c-brand-200) / <alpha-value>)",
+          300: "rgb(var(--c-brand-300) / <alpha-value>)",
+          400: "rgb(var(--c-brand-400) / <alpha-value>)",
+          500: "rgb(var(--c-brand-500) / <alpha-value>)",
+          600: "rgb(var(--c-brand-600) / <alpha-value>)",
+          700: "rgb(var(--c-brand-700) / <alpha-value>)",
+          accent: "rgb(var(--c-brand-accent) / <alpha-value>)",
+          emerald: "rgb(var(--c-brand-emerald) / <alpha-value>)",
+          cyan: "rgb(var(--c-brand-cyan) / <alpha-value>)",
         },
-        // Semantic status palette used by banners / pills / feedback states.
+        // Dedicated mint palette from the brand brief.
+        mint: {
+          50: "rgb(var(--c-mint-50) / <alpha-value>)",
+          100: "rgb(var(--c-mint-100) / <alpha-value>)",
+          200: "rgb(var(--c-mint-200) / <alpha-value>)",
+          300: "rgb(var(--c-mint-300) / <alpha-value>)",
+          400: "rgb(var(--c-mint-400) / <alpha-value>)",
+          500: "rgb(var(--c-mint-500) / <alpha-value>)",
+        },
+        deep: {
+          50: "rgb(var(--c-deep-50) / <alpha-value>)",
+          100: "rgb(var(--c-deep-100) / <alpha-value>)",
+          200: "rgb(var(--c-deep-200) / <alpha-value>)",
+          300: "rgb(var(--c-deep-300) / <alpha-value>)",
+          400: "rgb(var(--c-deep-400) / <alpha-value>)",
+          500: "rgb(var(--c-deep-500) / <alpha-value>)",
+          600: "rgb(var(--c-deep-600) / <alpha-value>)",
+          700: "rgb(var(--c-deep-700) / <alpha-value>)",
+          800: "rgb(var(--c-deep-800) / <alpha-value>)",
+          900: "rgb(var(--c-deep-900) / <alpha-value>)",
+        },
+        // Semantic status palette (theme-aware for both text + soft fills).
         success: {
-          DEFAULT: "#10b981",
-          soft: "rgba(16, 185, 129, 0.12)",
-          border: "rgba(16, 185, 129, 0.35)",
+          DEFAULT: "rgb(var(--c-success) / <alpha-value>)",
+          soft: "rgb(var(--c-success-soft) / <alpha-value>)",
+          border: "rgb(var(--c-success-border) / <alpha-value>)",
         },
         danger: {
-          DEFAULT: "#f43f5e",
-          soft: "rgba(244, 63, 94, 0.12)",
-          border: "rgba(244, 63, 94, 0.35)",
+          DEFAULT: "rgb(var(--c-danger) / <alpha-value>)",
+          soft: "rgb(var(--c-danger-soft) / <alpha-value>)",
+          border: "rgb(var(--c-danger-border) / <alpha-value>)",
         },
         warning: {
-          DEFAULT: "#f59e0b",
-          soft: "rgba(245, 158, 11, 0.12)",
-          border: "rgba(245, 158, 11, 0.35)",
+          DEFAULT: "rgb(var(--c-warning) / <alpha-value>)",
+          soft: "rgb(var(--c-warning-soft) / <alpha-value>)",
+          border: "rgb(var(--c-warning-border) / <alpha-value>)",
         },
         info: {
-          DEFAULT: "#06b6d4",
-          soft: "rgba(6, 182, 212, 0.12)",
-          border: "rgba(6, 182, 212, 0.35)",
+          DEFAULT: "rgb(var(--c-info) / <alpha-value>)",
+          soft: "rgb(var(--c-info-soft) / <alpha-value>)",
+          border: "rgb(var(--c-info-border) / <alpha-value>)",
+        },
+        // Tailwind stock palettes remapped onto our tokens (legacy components).
+        emerald: {
+          50: "rgb(var(--c-emerald-50) / <alpha-value>)",
+          100: "rgb(var(--c-emerald-100) / <alpha-value>)",
+          200: "rgb(var(--c-emerald-200) / <alpha-value>)",
+          300: "rgb(var(--c-emerald-300) / <alpha-value>)",
+          400: "rgb(var(--c-emerald-400) / <alpha-value>)",
+          500: "rgb(var(--c-emerald-500) / <alpha-value>)",
+          600: "rgb(var(--c-emerald-600) / <alpha-value>)",
+          700: "rgb(var(--c-emerald-700) / <alpha-value>)",
+        },
+        amber: {
+          50: "rgb(var(--c-amber-50) / <alpha-value>)",
+          100: "rgb(var(--c-amber-100) / <alpha-value>)",
+          200: "rgb(var(--c-amber-200) / <alpha-value>)",
+          300: "rgb(var(--c-amber-300) / <alpha-value>)",
+          400: "rgb(var(--c-amber-400) / <alpha-value>)",
+          500: "rgb(var(--c-amber-500) / <alpha-value>)",
+          600: "rgb(var(--c-amber-600) / <alpha-value>)",
+          700: "rgb(var(--c-amber-700) / <alpha-value>)",
+        },
+        red: {
+          50: "rgb(var(--c-red-50) / <alpha-value>)",
+          100: "rgb(var(--c-red-100) / <alpha-value>)",
+          200: "rgb(var(--c-red-200) / <alpha-value>)",
+          300: "rgb(var(--c-red-300) / <alpha-value>)",
+          400: "rgb(var(--c-red-400) / <alpha-value>)",
+          500: "rgb(var(--c-red-500) / <alpha-value>)",
+          600: "rgb(var(--c-red-600) / <alpha-value>)",
+          700: "rgb(var(--c-red-700) / <alpha-value>)",
+          800: "rgb(var(--c-red-800) / <alpha-value>)",
+          900: "rgb(var(--c-red-900) / <alpha-value>)",
+          950: "rgb(var(--c-red-950) / <alpha-value>)",
+        },
+        rose: {
+          100: "rgb(var(--c-rose-100) / <alpha-value>)",
+          200: "rgb(var(--c-rose-200) / <alpha-value>)",
+          300: "rgb(var(--c-rose-300) / <alpha-value>)",
+          400: "rgb(var(--c-rose-400) / <alpha-value>)",
+          500: "rgb(var(--c-rose-500) / <alpha-value>)",
+        },
+        violet: {
+          300: "rgb(var(--c-violet-300) / <alpha-value>)",
+          400: "rgb(var(--c-violet-400) / <alpha-value>)",
+          500: "rgb(var(--c-violet-500) / <alpha-value>)",
+        },
+        cyan: {
+          100: "rgb(var(--c-cyan-100) / <alpha-value>)",
+          200: "rgb(var(--c-cyan-200) / <alpha-value>)",
+          300: "rgb(var(--c-cyan-300) / <alpha-value>)",
+          400: "rgb(var(--c-cyan-400) / <alpha-value>)",
+          500: "rgb(var(--c-cyan-500) / <alpha-value>)",
+        },
+        orange: {
+          300: "rgb(var(--c-orange-300) / <alpha-value>)",
+          400: "rgb(var(--c-orange-400) / <alpha-value>)",
+          500: "rgb(var(--c-orange-500) / <alpha-value>)",
         },
       },
+      fontFamily: {
+        sans: [
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "SF Pro Display",
+          "SF Pro Text",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "sans-serif",
+        ],
+        mono: [
+          "SF Mono",
+          "SFMono-Regular",
+          "ui-monospace",
+          "Menlo",
+          "Consolas",
+          "monospace",
+        ],
+      },
       boxShadow: {
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
-        glow: "0 0 20px rgba(99, 102, 241, 0.35)",
-        "glow-cyan": "0 0 20px rgba(6, 182, 212, 0.35)",
-        "glow-emerald": "0 0 20px rgba(16, 185, 129, 0.35)",
+        glass: "0 8px 32px 0 rgb(var(--c-shadow) / 0.30)",
+        glow: "0 0 20px rgb(var(--c-brand-400) / 0.35)",
+        "glow-cyan": "0 0 20px rgb(var(--c-mint-300) / 0.35)",
+        "glow-emerald": "0 0 20px rgb(var(--c-mint-300) / 0.45)",
+        "glow-soft": "0 6px 24px 0 rgb(var(--c-brand-600) / 0.18)",
+        card: "0 10px 40px -12px rgb(var(--c-shadow) / 0.35)",
       },
       backdropBlur: {
         xs: "2px",
-        glass: "16px",
+        glass: "18px",
+        lg: "24px",
       },
       // h-4.5 / w-4.5 / size-5.5 … (Tailwind v3 default scale has no .5 steps)
       spacing: {
         "4.5": "1.125rem",
         "5.5": "1.375rem",
+      },
+      borderRadius: {
+        "2.5xl": "1.25rem",
+        "3xl": "1.5rem",
       },
       animation: {
         pulseFast: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -78,6 +195,8 @@ const config: Config = {
         shimmer: "shimmer 1.6s linear infinite",
         "fade-in": "fade-in 0.3s ease-out both",
         "slide-up": "slide-up 0.35s ease-out both",
+        "scale-in": "scale-in 0.18s ease-out both",
+        "spin-slow": "spin 3s linear infinite",
       },
       keyframes: {
         glow: {
@@ -107,6 +226,10 @@ const config: Config = {
         "slide-up": {
           "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          "0%": { opacity: "0", transform: "scale(0.97)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
         },
       },
     },

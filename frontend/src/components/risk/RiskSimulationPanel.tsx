@@ -294,7 +294,7 @@ export function RiskSimulationPanel({
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 via-brand-accent to-brand-cyan flex items-center justify-center shadow-glow">
-            <Gauge className="h-5 w-5 text-white" />
+            <Gauge className="h-5 w-5 text-on-accent" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -489,7 +489,7 @@ export function RiskSimulationPanel({
                 <button
                   onClick={onReview}
                   disabled={result.riskLevel === "HIGH" && !highRiskAck}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-on-accent text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   Confirm & Sign
@@ -508,7 +508,7 @@ export function RiskSimulationPanel({
               )}
               <button
                 onClick={() => setReviewing(true)}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-500 text-white text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow transition-all"
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan hover:from-brand-500 hover:to-brand-500 text-on-accent text-[13px] font-bold flex items-center justify-center gap-2 shadow-glow transition-all"
               >
                 <Eye className="h-4 w-4" />
                 {reviewLabel}
