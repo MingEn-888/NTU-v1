@@ -1,6 +1,6 @@
 # Database Testing & Verification Guide — Phase 2
 
-This document provides step-by-step instructions and SQL verification scripts to validate the IBAP Phase 2 database migration, RLS policies, constraints, and seed data.
+This document provides step-by-step instructions and SQL verification scripts to validate the PayMaster Phase 2 database migration, RLS policies, constraints, and seed data.
 
 ---
 

@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk Evaluation & Transaction Simulation Engine self-test
+// PayMaster Phase 8 — Risk Evaluation & Transaction Simulation Engine self-test
 // Exercises the risk engine core (no OpenAI key needed):
 //   - all 7 risk checks (PASS / WARN / FAIL) individually
 //   - deterministic risk scoring + LOW / MEDIUM / HIGH classification
@@ -501,7 +501,7 @@ function testAdapter() {
 // -----------------------------------------------------------------------------
 
 async function main() {
-  console.log("IBAP Phase 8 — Risk & Simulation Engine self-test\n");
+  console.log("PayMaster Phase 8 — Risk & Simulation Engine self-test\n");
 
   testChecks();
   testScoring();

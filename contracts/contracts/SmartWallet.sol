@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /**
  * @title SmartWallet
- * @notice IBAP controlled payment execution layer (Phase 9).
+ * @notice PayMaster controlled payment execution layer (Phase 9).
  *
  * @dev
  * TRUST BOUNDARY — the contract NEVER trusts an LLM, a solver or any off-chain

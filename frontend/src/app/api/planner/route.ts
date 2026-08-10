@@ -1,6 +1,6 @@
 // =============================================================================
 // POST /api/planner
-// IBAP Phase 6 — Transaction Planner Engine endpoint.
+// PayMaster Phase 6 — Transaction Planner Engine endpoint.
 //
 // Converts a *validated* intent (Phase 5 StructuredIntent) + treasury context
 // into one or more CandidateExecutionPlan objects. Every input field is checked
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Unexpected errors.
-    console.error("[IBAP-planner] /api/planner unexpected error:", err);
+    console.error("[PayMaster-planner] /api/planner unexpected error:", err);
     const message = err instanceof Error ? err.message : "Unexpected server error";
     return errorResponse("INTERNAL", message, undefined, 500);
   }

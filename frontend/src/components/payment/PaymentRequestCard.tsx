@@ -187,7 +187,7 @@ export default function PaymentRequestCard({
           </div>
           <div>
             <div className="text-[13px] font-bold text-white leading-tight">Business Payment Operation</div>
-            <div className="text-[10px] text-gray-500 font-medium">IBAP · Intent Parsed</div>
+            <div className="text-[10px] text-gray-500 font-medium">PayMaster · Intent Parsed</div>
           </div>
         </div>
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-bold ${meta.className}`}>

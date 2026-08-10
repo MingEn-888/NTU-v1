@@ -122,9 +122,9 @@ export function useWallet() {
           }
         }
       } else {
-        // Fallback for unsupported chains
-        tokenBalances.USDC = "15000.00";
-        tokenBalances.USDT = "3500.00";
+        // Unsupported chain — never fabricate live-looking balances.
+        tokenBalances.USDC = "0.0";
+        tokenBalances.USDT = "0.0";
       }
 
       setState((prev) => ({
@@ -163,7 +163,10 @@ export function useWallet() {
       
       // Request accounts
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const address = accounts[0];
+      const address = accounts?.[0];
+      if (!address) {
+        throw new Error("No wallet account available — unlock MetaMask and try again.");
+      }
 
       // Get network chainId
       const network = await providerRef.current.getNetwork();
@@ -175,6 +178,8 @@ export function useWallet() {
       let errMsg = "Failed to connect wallet.";
       if (err.code === 4001) {
         errMsg = "Connection request rejected by user.";
+      } else if (err?.message?.includes("unlock")) {
+        errMsg = "MetaMask is locked — unlock it to connect.";
       }
       setState((prev) => ({
         ...prev,
@@ -255,6 +260,15 @@ export function useWallet() {
   const executePayment = useCallback(async (to: string, amount: string, tokenAddress?: string) => {
     if (!state.address || !providerRef.current) {
       throw new Error("Wallet not connected");
+    }
+
+    // Input validation (Phase 12 edge-case hardening).
+    if (!/^0x[a-fA-F0-9]{40}$/.test(to)) {
+      throw new Error("Invalid recipient address — expected a 0x wallet address.");
+    }
+    const amt = Number(amount);
+    if (!amount || Number.isNaN(amt) || amt <= 0) {
+      throw new Error("Invalid payment amount — enter a positive number.");
     }
 
     const signer = await providerRef.current.getSigner();

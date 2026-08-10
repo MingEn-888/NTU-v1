@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 6 — Planner Zod schemas
+// PayMaster Phase 6 — Planner Zod schemas
 //
 // Every input to POST /api/planner is validated here, and every object the
 // planner emits is shape-checked before it can leave the service boundary. This

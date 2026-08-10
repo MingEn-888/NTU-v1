@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 10 — Execution error classification.
+// PayMaster Phase 10 — Execution error classification.
 //
 // Maps every failure mode the wallet / RPC / contract can surface into a typed
 // ExecutionError so the UI can render the correct recovery hint:

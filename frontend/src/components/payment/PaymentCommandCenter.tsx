@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   MessageSquareText,
   FileText,
@@ -11,11 +13,13 @@ import {
   CheckCircle2,
   Loader2,
   Activity,
+  PlayCircle,
+  ArrowRight,
 } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
 import { useTreasury } from "@/hooks/useTreasury";
 import { ChatWindow } from "@/components/chat/ChatWindow";
-import { RiskSimulationPanel } from "@/components/risk/RiskSimulationPanel";
+import { Banner } from "@/components/ui/banner";
 import type { OperationStage } from "@/lib/payment/types";
 import { formatAddress } from "@/lib/utils";
 
@@ -48,15 +52,40 @@ function stageIndex(stage: OperationStage): number {
 export function PaymentCommandCenter() {
   const wallet = useWallet();
   const treasury = useTreasury(wallet.address, wallet.chainId, wallet.balance, wallet.tokenBalances);
-  const [stage, setStage] = useState<OperationStage>("natural_language");
+
+  // Phase 11 — deep-linked from the dashboard AI command bar (?prompt=) and the
+  // approval queue (?review=). The prompt is pre-filled into the agent chat;
+  // the review id indicates the operator came here to review a prepared plan.
+  const searchParams = useSearchParams();
+  const initialPrompt = useMemo(() => {
+    const p = searchParams?.get("prompt");
+    return p ? p : undefined;
+  }, [searchParams]);
+
+  const reviewId = useMemo(() => searchParams?.get("review") || null, [searchParams]);
 
   const businessId = useMemo(
     () => treasury.businessProfile?.id || DEFAULT_BUSINESS_ID,
     [treasury.businessProfile]
   );
 
+  // Land on the plan stage when the operator arrives from the approval queue.
+  const [stage, setStage] = useState<OperationStage>(reviewId ? "payment_plan" : "natural_language");
+
   const currentIdx = stageIndex(stage);
   const isExecuting = stage === "executing";
+
+  const handleWalletToggle = async () => {
+    try {
+      if (wallet.isConnected) {
+        wallet.disconnect();
+      } else {
+        await wallet.connect();
+      }
+    } catch {
+      // connect() surfaces errors via wallet.error state.
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -73,14 +102,14 @@ export function PaymentCommandCenter() {
             <div>
               <div className="flex items-center gap-2.5">
                 <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">
-                  IBAP <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-cyan">Payment Operations</span>
+                  PayMaster <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-cyan">Financial Assistant</span>
                 </h1>
                 <span className="px-2 py-0.5 text-[10px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 rounded-full">
-                  Phase 4
+                  Live Agent
                 </span>
               </div>
               <p className="text-gray-400 text-sm mt-1">
-                Describe a payment — the agent handles intent, routing, risk & approval.
+                Your financial assistant — describe a payment, check the treasury, and approve from your wallet.
               </p>
             </div>
           </div>
@@ -100,7 +129,7 @@ export function PaymentCommandCenter() {
             </div>
 
             <button
-              onClick={wallet.isConnected ? wallet.disconnect : wallet.connect}
+              onClick={handleWalletToggle}
               disabled={wallet.isConnecting}
               className={`px-4 py-2.5 rounded-xl text-[12px] font-bold flex items-center gap-2 transition-all ${
                 wallet.isConnected
@@ -173,7 +202,7 @@ export function PaymentCommandCenter() {
                 <Activity className="h-4 w-4" />
               </div>
               <div>
-                <div className="text-[13px] font-bold text-white leading-tight">Agent Conversation</div>
+                <div className="text-[13px] font-bold text-white leading-tight">Assistant Conversation</div>
                 <div className="text-[10px] text-gray-500 font-medium">
                   {treasury.businessProfile?.business_name || "TechCorp Solutions Sdn Bhd"}
                 </div>
@@ -197,6 +226,7 @@ export function PaymentCommandCenter() {
               }}
               onOperationStageChange={setStage}
               simulationContext={treasury.treasuryContext}
+              initialPrompt={initialPrompt}
             />
           </div>
         </div>
@@ -214,16 +244,42 @@ export function PaymentCommandCenter() {
         </div>
       </div>
 
-      {/* ======================= Phase 8 preview ======================= */}
-      <div className="mt-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-            Phase 8 · Risk &amp; Simulation preview
-          </div>
-          <div className="h-px flex-1 bg-white/5" />
+      {/* ======================= Deep-link context banner ======================= */}
+      {reviewId && (
+        <div className="mt-2">
+          <Banner tone="info" title="Reviewing a prepared payment" message={`You arrived from the approval queue (request ${reviewId}). The plan, risk assessment and approval step are ready below — sign to execute or reject.`} />
         </div>
-        <RiskSimulationPanel />
-      </div>
+      )}
+
+      {/* ======================= Demo helper (only when idle) ======================= */}
+      {stage === "natural_language" && !initialPrompt && (
+        <div className="mt-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+              New here? See the product demo
+            </div>
+            <div className="h-px flex-1 bg-white/5" />
+          </div>
+          <div className="glass-panel rounded-2xl border border-white/10 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-brand-500/25 to-brand-cyan/15 border border-brand-500/30 text-brand-300 shrink-0">
+              <PlayCircle className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-extrabold text-white">Watch one payment end-to-end</div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                &ldquo;Pay Alice RM2,500 for invoice INV-1024 by Friday.&rdquo; — intent → routes → risk →
+                approval → SmartWallet → audit, run on the real engines.
+              </p>
+            </div>
+            <Link
+              href="/demo"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500/20 border border-brand-500/40 text-brand-200 text-xs font-bold hover:bg-brand-500/30 transition-colors shrink-0"
+            >
+              Open walkthrough <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

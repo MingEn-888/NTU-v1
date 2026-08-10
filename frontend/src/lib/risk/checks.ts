@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — The 7 deterministic risk checks
+// PayMaster Phase 8 — The 7 deterministic risk checks
 //
 // Every check is a pure function of the validated simulation input. Each one
 // returns a RiskCheckResult with a status (PASS / WARN / FAIL), a deterministic

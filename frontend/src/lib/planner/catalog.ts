@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 6 — Deterministic execution catalog
+// PayMaster Phase 6 — Deterministic execution catalog
 //
 // Every number the planner uses to size a step lives here as a constant table.
 // Nothing in this file is influenced by the LLM — it is the single source of

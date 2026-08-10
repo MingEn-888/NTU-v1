@@ -1,25 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Send, Route, History, Settings, MessageSquareText } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Send, Route, History, Settings, MessageSquareText, ShieldCheck, PlayCircle } from "lucide-react";
 
 interface NavItem {
   id: string;
   label: string;
   icon: React.ElementType;
+  href: string;
   badge?: string;
 }
 
 export const Sidebar: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "create", label: "New Intent", icon: Send, badge: "Live" },
-    { id: "routes", label: "Route Optimizer", icon: Route, badge: "3 Options" },
-    { id: "history", label: "Tx History", icon: History },
-    { id: "settings", label: "Preferences", icon: Settings },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { id: "demo", label: "Product Demo", icon: PlayCircle, href: "/demo", badge: "Walkthrough" },
+    { id: "create", label: "New Intent", icon: Send, href: "/operations", badge: "Live" },
+    { id: "routes", label: "Route Optimizer", icon: Route, href: "/", badge: "Demo" },
+    { id: "history", label: "Tx History", icon: History, href: "/dashboard" },
+    { id: "settings", label: "Preferences", icon: Settings, href: "/operations" },
   ];
 
   return (
@@ -31,27 +34,30 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <nav className="space-y-1.5">
-          {/* Phase 4 — AI Payment Operations (real navigation) */}
+          {/* Business Payment Operations — primary surface */}
           <Link
-            href="/operations"
+            href="/dashboard"
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-brand-600/25 to-brand-cyan/10 border border-brand-500/40 shadow-glow text-white transition-all duration-150 hover:from-brand-600/40 hover:to-brand-cyan/20"
           >
             <div className="flex items-center gap-3">
-              <MessageSquareText className="h-4 w-4 text-brand-cyan" />
-              <span>AI Payments</span>
+              <LayoutDashboard className="h-4 w-4 text-brand-cyan" />
+              <span>Business Payments</span>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-500 text-white">
-              Phase 4
+              Core
             </span>
           </Link>
 
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive =
+              item.href !== "/"
+                ? pathname?.startsWith(item.href)
+                : pathname === "/";
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                href={item.href}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
                   isActive
                     ? "bg-brand-500/20 text-white border border-brand-500/40 shadow-glow"
@@ -73,12 +79,22 @@ export const Sidebar: React.FC = () => {
                     {item.badge}
                   </span>
                 )}
-              </button>
+              </Link>
             );
           })}
         </nav>
       </div>
 
+      {/* Product footer */}
+      <div className="px-3 py-3 rounded-xl bg-black/20 border border-white/5">
+        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+          <ShieldCheck className="h-3 w-3 text-brand-emerald" />
+          Trust boundary
+        </div>
+        <p className="text-[11px] leading-relaxed text-gray-500">
+          AI parses intent · math selects the route · <span className="text-gray-300">you sign</span>
+        </p>
+      </div>
     </aside>
   );
 };

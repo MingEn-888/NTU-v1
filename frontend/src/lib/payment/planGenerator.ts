@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Payment Plan Generator
+// PayMaster Payment Plan Generator
 // Takes a ParsedPaymentIntent + treasury context and produces an optimised
 // PaymentPlan: settlement currency, route options, execution steps and a risk
 // assessment — mirroring the Phase 2 DB pipeline (payment_plans, route_options,

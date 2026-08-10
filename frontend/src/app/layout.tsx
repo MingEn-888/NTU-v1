@@ -3,8 +3,9 @@ import "./globals.css";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "IntentFlow - Payment Router",
-  description: "Intent-based payment router: AI parses intent, deterministic optimizer selects the route, you approve before execution.",
+  title: "PayMaster — AI Financial Assistant",
+  description:
+    "PayMaster is your AI financial assistant for business payments. Ask in plain language to pay invoices, reimburse expenses, or settle vendors — the math selects the route, a human approves, and the SmartWallet executes.",
 };
 
 export default function RootLayout({

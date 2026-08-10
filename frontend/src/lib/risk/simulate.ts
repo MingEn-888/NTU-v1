@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk Evaluation & Transaction Simulation Engine (service)
+// PayMaster Phase 8 — Risk Evaluation & Transaction Simulation Engine (service)
 //
 // FLOW:
 //   Selected Route + Treasury + Wallet + Recipient  (validated by Zod)

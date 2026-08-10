@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 6 — Transaction Planner Engine (domain types)
+// PayMaster Phase 6 — Transaction Planner Engine (domain types)
 //
 // The planner converts a *validated* StructuredIntent (Phase 5) + treasury
 // context into one or more CandidateExecutionPlan objects. Every candidate plan

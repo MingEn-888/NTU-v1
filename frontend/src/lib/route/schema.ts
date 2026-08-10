@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Route Optimizer Zod schemas
+// PayMaster Phase 7 — Route Optimizer Zod schemas
 //
 // Every input to POST /api/route/optim is validated here, and every route the
 // optimizer emits is shape-checked before it can leave the service boundary.

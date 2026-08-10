@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization Engine self-test
+// PayMaster Phase 7 — Deterministic Route Optimization Engine self-test
 // Exercises the optimizer core (no OpenAI key needed):
 //   - normalization functions (min-max, savings, clamps)
 //   - weight resolution (user weights re-normalized to sum 1)

@@ -8,6 +8,14 @@
   --color-card-border: rgba(255, 255, 255, 0.08);
 }
 
+* {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   color: #f3f4f6;
   background-color: var(--color-bg);
@@ -19,6 +27,101 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus ring — consistent, accessible keyboard focus across all surfaces */
+:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Custom scrollbars that fit the dark glass theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.4);
+}
+
+/* Number alignment for financial values */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* ---- Skeleton loading block (shimmer) ---- */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.07),
+      transparent
+    );
+    animation: shimmer 1.6s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  /* ---- Feedback banners (error / success / warning / info) ---- */
+  .banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.875rem;
+    border: 1px solid;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .banner-error {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.35);
+    color: #fda4af;
+  }
+  .banner-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #6ee7b7;
+  }
+  .banner-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fcd34d;
+  }
+  .banner-info {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: rgba(6, 182, 212, 0.35);
+    color: #67e8f9;
+  }
+  .banner-neutral {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d1d5db;
+  }
+
+  /* ---- Section / empty-state text ---- */
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
 @layer utilities {
@@ -67,6 +170,13 @@ body {
   .glow-text {
     text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
   }
+
+  .text-gradient {
+    background-image: linear-gradient(90deg, #818cf8, #a78bfa, #22d3ee);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 /* Execution timeline — animated connector for in-progress steps */
@@ -77,4 +187,16 @@ body {
     transparent 5px 10px
   );
   animation: flow-dash 0.6s linear infinite;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

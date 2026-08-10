@@ -1,6 +1,6 @@
 // =============================================================================
 // POST /api/intent/parse
-// IBAP Phase 5 — AI Intent & Payment Extraction Engine endpoint.
+// PayMaster Phase 5 — AI Intent & Payment Extraction Engine endpoint.
 //
 // Converts a natural-language business payment instruction into a validated
 // structured intent:
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Unexpected errors.
-    console.error("[IBAP-intent] /api/intent/parse unexpected error:", err);
+    console.error("[PayMaster-intent] /api/intent/parse unexpected error:", err);
     const message = err instanceof Error ? err.message : "Unexpected server error";
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL", message } },

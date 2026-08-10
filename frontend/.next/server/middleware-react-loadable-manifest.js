@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"lib\\\\risk\\\\explain.ts -> openai\":{\"id\":\"lib\\\\risk\\\\explain.ts -> openai\",\"files\":[\"static/chunks/_app-pages-browser_node_modules_openai_index_mjs.js\"]}}"

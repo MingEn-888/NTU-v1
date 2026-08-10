@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 /**
  * @title MockERC20
  * @notice Minimal mintable ERC-20 used for local testing of SmartWallet
- *         (Phase 9) and to simulate an IBAP settlement token (e.g. USDC).
+ *         (Phase 9) and to simulate an PayMaster settlement token (e.g. USDC).
  * @dev Zero-dependency implementation so tests do not need external deps.
  *      Includes the classic `safeApprove` pitfall pattern-free standard
  *      `approve` (set-allowance semantics) and a `mint`/`burn` for test setup.

@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     const messages: ChatMessage[] = (data || []).map(mapMessage);
     return NextResponse.json({ success: true, messages });
   } catch (err: any) {
-    console.warn("[IBAP-chat] Supabase unreachable, returning empty history:", err?.message);
+    console.warn("[PayMaster-chat] Supabase unreachable, returning empty history:", err?.message);
     return NextResponse.json({ success: true, messages: [], source: "fallback" });
   }
 }
@@ -98,6 +98,23 @@ export async function GET(req: NextRequest) {
 // ---------------------------------------------------------------------------
 
 export async function POST(req: NextRequest) {
+  // Supabase not configured -> respond fast so the client can parse locally
+  // (offline demo mode) instead of waiting on a doomed network fetch.
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      {
+        success: false,
+        offline: true,
+        message: "offline",
+        error: {
+          code: "STORE_OFFLINE",
+          message: "Treasury store is not configured — parse this instruction locally (offline demo mode).",
+        },
+      },
+      { status: 503 }
+    );
+  }
+
   const supabaseAdmin = getSupabaseAdmin();
   try {
     const { businessId, message } = await req.json();

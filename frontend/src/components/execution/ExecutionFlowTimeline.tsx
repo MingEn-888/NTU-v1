@@ -1,7 +1,7 @@
 "use client";
 
 // =============================================================================
-// IBAP Phase 10 — Execution Flow Timeline.
+// PayMaster Phase 10 — Execution Flow Timeline.
 //
 // Renders the full safe execution lifecycle as a single vertical timeline:
 //     ✓ Payment understood → ✓ Route optimized → ✓ Risk checked

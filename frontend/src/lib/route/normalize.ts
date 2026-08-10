@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 7 — Deterministic Route Optimization (normalization functions)
+// PayMaster Phase 7 — Deterministic Route Optimization (normalization functions)
 //
 // Every factor of a candidate route is min-max normalized to [0,1] across the
 // candidate set: 0 = best in the set, 1 = worst. This makes the four factors

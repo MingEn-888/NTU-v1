@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 5 — Intent & Payment Extraction Engine (parser)
+// PayMaster Phase 5 — Intent & Payment Extraction Engine (parser)
 //
 // The LLM interprets a natural-language business payment instruction and returns
 // a structured intent (OpenAI Structured Outputs, enforced by a Zod schema).
@@ -125,7 +125,7 @@ export async function parseIntentWithAI(options: ParseIntentOptions): Promise<St
       throw new IntentExtractionError("RATE_LIMITED", "OpenAI rate limit reached — please retry shortly.", { status });
     }
     // Any other OpenAI/network failure degrades gracefully to the deterministic parser.
-    console.error("[IBAP-intent] OpenAI call failed, falling back to deterministic parser:", err);
+    console.error("[PayMaster-intent] OpenAI call failed, falling back to deterministic parser:", err);
     return parseFallback(text);
   }
 

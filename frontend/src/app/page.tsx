@@ -3,19 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   Cpu,
-  DollarSign,
-  Fuel,
   Route,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   Zap,
   CheckCircle,
   XCircle,
   ExternalLink,
-  MessageSquareText
+  LayoutDashboard,
+  MessageSquareText,
+  PlayCircle
 } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
 import { useTreasury } from "@/hooks/useTreasury";
@@ -58,8 +56,7 @@ export default function Home() {
       setTxHash(receipt.hash || receipt.transactionHash);
       await treasury.refreshTreasury();
     } catch (err: any) {
-      console.error(err);
-      setExecError(err.message || "Payment execution failed");
+      setExecError(err?.message || "Payment execution failed");
     } finally {
       setExecuting(false);
     }
@@ -82,8 +79,8 @@ export default function Home() {
         {
           targetContract: recipient, // Native transfer executes as simple call to target address
           callData: "0x",
-          value: amount
-        }
+          value: amount,
+        },
       ];
 
       const receipt = await wallet.executeSmartWalletBatch(
@@ -94,8 +91,7 @@ export default function Home() {
       setTxHash(receipt.hash || receipt.transactionHash);
       await treasury.refreshTreasury();
     } catch (err: any) {
-      console.error(err);
-      setExecError(err.message || "Smart Wallet Execution failed. Make sure IntentRouter contract is deployed.");
+      setExecError(err?.message || "Smart Wallet execution failed.");
     } finally {
       setExecuting(false);
     }
@@ -115,22 +111,38 @@ export default function Home() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Intent-Based <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 via-brand-accent to-brand-cyan">Payment Router</span>
+            Turn business payment instructions into{" "}
+            <span className="text-gradient">optimized, explainable</span> blockchain transactions.
           </h1>
 
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-            Describe a payment in plain language. IBAP parses the intent into a structured request, generates
-            candidate routes, then a deterministic weighted model selects the cheapest, safest route. The AI only
-            interprets — you approve before any funds move, and the selected route executes deterministically.
+            PayMaster — your AI financial assistant for business payments. Ask in plain language: pay an
+            invoice, reimburse an expense, or settle a vendor. The AI parses the intent into a structured
+            request; a deterministic weighted model selects the cheapest, safest route; the risk engine
+            evaluates it; you approve; and only then does the SmartWallet execute. You stay in control.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
-              href="/operations"
+              href="/dashboard"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-white text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
             >
+              <LayoutDashboard className="h-4 w-4" />
+              Business Payments Dashboard
+            </Link>
+            <Link
+              href="/operations"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10 hover:text-white transition-all"
+            >
               <MessageSquareText className="h-4 w-4" />
-              Open AI Payment Operations
+              Open Financial Assistant
+            </Link>
+            <Link
+              href="/demo"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-brand-500/30 text-brand-200 text-sm font-bold hover:bg-brand-500/10 hover:text-white transition-all"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Product Demo
             </Link>
             <span className="text-[11px] text-gray-500 font-medium">
               Describe a payment · Get a plan · Approve & execute
@@ -139,45 +151,45 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Metrics Row — honest product facts (no fabricated analytics) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-gray-400">
-            <span className="text-xs font-medium">Total Volume Executed</span>
-            <DollarSign className="h-4 w-4 text-brand-500" />
-          </div>
-          <div className="text-2xl font-bold text-white">$1,482,900</div>
-          <div className="flex items-center gap-1.5 text-xs text-emerald-400">
-            <TrendingUp className="h-3.5 w-3.5" />
-            <span>+24.8% vs last week</span>
-          </div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
-          <div className="flex items-center justify-between text-gray-400">
-            <span className="text-xs font-medium">Avg Gas Saved</span>
-            <Fuel className="h-4 w-4 text-brand-cyan" />
-          </div>
-          <div className="text-2xl font-bold text-white">38.4%</div>
-          <div className="text-xs text-gray-400">Optimal batch routing</div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
-          <div className="flex items-center justify-between text-gray-400">
             <span className="text-xs font-medium">Route Selection</span>
-            <Cpu className="h-4 w-4 text-brand-accent" />
+            <Cpu className="h-4 w-4 text-brand-500" />
           </div>
           <div className="text-2xl font-bold text-white">Deterministic</div>
-          <div className="text-xs text-emerald-400">Weighted · lower score wins</div>
+          <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+            <CheckCircle className="h-3.5 w-3.5" />
+            <span>Weighted · lower score wins</span>
+          </div>
         </div>
 
         <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-gray-400">
-            <span className="text-xs font-medium">Execution Success</span>
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span className="text-xs font-medium">Human Approval</span>
+            <ShieldCheck className="h-4 w-4 text-brand-cyan" />
           </div>
-          <div className="text-2xl font-bold text-white">99.4%</div>
-          <div className="text-xs text-gray-400">Atomic rollback protection</div>
+          <div className="text-2xl font-bold text-white">Always</div>
+          <div className="text-xs text-gray-400">Nothing moves without your signature</div>
+        </div>
+
+        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+          <div className="flex items-center justify-between text-gray-400">
+            <span className="text-xs font-medium">Risk Checks</span>
+            <Cpu className="h-4 w-4 text-brand-accent" />
+          </div>
+          <div className="text-2xl font-bold text-white">7 per payment</div>
+          <div className="text-xs text-emerald-400">Evaluated before approval</div>
+        </div>
+
+        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+          <div className="flex items-center justify-between text-gray-400">
+            <span className="text-xs font-medium">Execution Layer</span>
+            <Zap className="h-4 w-4 text-emerald-400" />
+          </div>
+          <div className="text-2xl font-bold text-white">SmartWallet</div>
+          <div className="text-xs text-gray-400">Auditable · nonce-protected</div>
         </div>
       </div>
 
@@ -236,7 +248,7 @@ export default function Home() {
               <Zap className="h-5 w-5 text-brand-500" />
               <h2 className="text-lg font-bold text-white">Execution Playground</h2>
             </div>
-            <span className="text-xs text-gray-400">Trigger live MetaMask payouts</span>
+            <span className="text-xs text-gray-400">Live payout test · MetaMask required</span>
           </div>
 
           {/* Tabs */}
@@ -399,7 +411,7 @@ export default function Home() {
           </div>
 
           <div className="pt-4 border-t border-white/10 text-center">
-            <span className="text-xs text-gray-400">Phase 3 Web3 Integration Connected</span>
+            <span className="text-xs text-gray-400">Intent → Plan → Route → Risk → Approval → Execute → Audit</span>
           </div>
         </div>
       </div>

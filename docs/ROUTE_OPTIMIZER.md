@@ -1,4 +1,4 @@
-# IBAP Phase 7 — Deterministic Route Optimization Engine
+# PayMaster Phase 7 — Deterministic Route Optimization Engine
 
 > **Role in the pipeline:** Phase 5 parses intent (LLM interprets), Phase 6
 > generates candidate payment plans (LLM proposes *strategies* only). **Phase 7

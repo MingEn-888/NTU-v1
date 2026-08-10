@@ -41,14 +41,16 @@ interface ChatWindowProps {
   onOperationStageChange?: (stage: OperationStage) => void;
   /** Treasury context (assets / chains / gas) fed to the Phase 8 risk engine. */
   simulationContext?: SimulationTreasuryLike | null;
+  /** Phase 11 — deep-linked instruction (e.g. from the dashboard command bar). */
+  initialPrompt?: string;
 }
 
 const SUGGESTIONS = [
   "Pay Alice RM2,500 for invoice INV-1024 by Friday.",
+  "How much is available in the treasury right now?",
   "Pay contractor $1,200 in USDC.",
   "Settle invoice INV-2048 using treasury.",
   "Reimburse Priya $450 for travel expenses.",
-  "Send 500 USDC to David for equipment supplies.",
 ];
 
 async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promise<any> {
@@ -75,7 +77,7 @@ async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promi
   }
 }
 
-export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext }: ChatWindowProps) {
+export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext, initialPrompt }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [sending, setSending] = useState(false);
@@ -89,6 +91,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const streamTimersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
+  const initialPromptSentRef = useRef(false);
 
   // --- Auto scroll -----------------------------------------------------------
   useEffect(() => {
@@ -108,7 +111,10 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     setLoadingHistory(true);
     try {
       const data = await apiJson(`/api/chat?businessId=${encodeURIComponent(bizId)}`);
-      setMessages(data.messages || []);
+      // Don't clobber an in-flight conversation: if the operator has already
+      // sent a message (e.g. a deep-linked prompt that resolved before this
+      // history request), keep the live messages instead of the empty store.
+      setMessages((prev) => (prev.length > 0 ? prev : data.messages || []));
       // Reflect the latest persisted operation stage if a plan already exists.
       const lastAgent = (data.messages || []).filter((m: ChatMessageModel) => m.role === "agent").pop();
       if (lastAgent?.plan) onOperationStageChange?.("payment_plan");
@@ -263,6 +269,13 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     },
     [businessId, sending, startStreaming, onOperationStageChange, offlineMode, localProcessMessage, markOffline]
   );
+
+  // --- Phase 11 deep-link: auto-send the dashboard instruction once -----------
+  useEffect(() => {
+    if (!businessId || !initialPrompt || initialPromptSentRef.current || sending) return;
+    initialPromptSentRef.current = true;
+    handleSend(initialPrompt);
+  }, [businessId, initialPrompt, sending, handleSend]);
 
   // --- Generate payment plan --------------------------------------------------
   const handleGeneratePlan = useCallback(
@@ -549,7 +562,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
         </div>
         <h3 className="text-white font-bold text-lg">No treasury context loaded</h3>
         <p className="text-gray-500 text-sm max-w-sm mt-2">
-          Associate a business profile & wallet to start issuing payment operations to the IBAP agent.
+          Associate a business profile & wallet to start working with your PayMaster financial assistant.
         </p>
       </div>
     );
@@ -589,7 +602,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
         {sending && (
           <div className="flex items-center gap-2 text-gray-500 text-xs px-1">
             <span className="h-3.5 w-3.5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
-            <span>Routing to payment agent…</span>
+            <span>PayMaster is thinking…</span>
           </div>
         )}
       </div>
@@ -623,16 +636,17 @@ function EmptyState({ businessName }: { businessName?: string }) {
         </div>
         <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 border-2 border-[#08090d] animate-pulse" />
       </div>
-      <h3 className="text-white font-bold text-xl">IBAP Payment Operations</h3>
+      <h3 className="text-white font-bold text-xl">PayMaster Financial Assistant</h3>
       <p className="text-gray-500 text-sm max-w-md mt-2 leading-relaxed">
-        {businessName ? `${businessName} · ` : ""}Describe a business payment in plain language and I&apos;ll turn it
-        into a verifiable, approvable treasury operation.
+        {businessName ? `${businessName} · ` : ""}Ask about your finances or start a payment in plain
+        language — I&apos;ll turn it into a verifiable, approvable treasury operation. No funds move
+        until you approve.
       </p>
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 w-full max-w-lg text-left">
         {[
-          { t: "Natural Language", d: "Describe who, how much & when" },
-          { t: "Payment Request", d: "Parsed, structured operation" },
-          { t: "Plan → Approval", d: "Route, risk & sign with wallet" },
+          { t: "Pay invoices", d: "Invoices, contractors & vendors" },
+          { t: "Reimburse & transfer", d: "Expenses & treasury transfers" },
+          { t: "Approve & settle", d: "Route, risk & sign with wallet" },
         ].map((s, i) => (
           <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
             <div className="text-[10px] font-bold uppercase tracking-wider text-brand-cyan">{s.t}</div>

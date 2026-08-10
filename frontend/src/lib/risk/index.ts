@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk & Simulation engine public barrel
+// PayMaster Phase 8 — Risk & Simulation engine public barrel
 // =============================================================================
 
 export * from "./types";

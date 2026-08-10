@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk Evaluation & Transaction Simulation Engine (domain types)
+// PayMaster Phase 8 — Risk Evaluation & Transaction Simulation Engine (domain types)
 //
 // Phase 7 selected the *best route* deterministically. Phase 8 evaluates that
 // selected route — and every candidate — BEFORE any human approval:

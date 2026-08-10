@@ -9,6 +9,19 @@ import { useWallet } from "@/hooks/useWallet";
 export const Navbar: React.FC = () => {
   const { isConnected, isConnecting, address, connect, disconnect } = useWallet();
 
+  const handleConnect = async () => {
+    try {
+      if (isConnected) {
+        disconnect();
+      } else {
+        await connect();
+      }
+    } catch (err) {
+      // connect() already surfaces a friendly error in the wallet state;
+      // swallow here so an unhandled rejection never bubbles to the console.
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 glass-navbar w-full px-6 py-3.5 flex items-center justify-between">
       {/* Brand & Logo */}
@@ -19,13 +32,13 @@ export const Navbar: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-lg tracking-tight text-white glow-text">
-              INTENT<span className="text-brand-500">FLOW</span>
+              PayMaster
             </span>
-            <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-500 border border-brand-500/30 rounded-full">
+            <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30 rounded-full">
               v1.0
             </span>
           </div>
-          <p className="text-xs text-gray-400 font-medium">Intent parsing · deterministic routing</p>
+          <p className="text-xs text-gray-400 font-medium">AI Financial Assistant</p>
         </div>
       </div>
 
@@ -53,7 +66,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         <button
-          onClick={isConnected ? disconnect : connect}
+          onClick={handleConnect}
           disabled={isConnecting}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
             isConnected

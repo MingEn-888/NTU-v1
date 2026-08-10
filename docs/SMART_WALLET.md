@@ -1,6 +1,6 @@
-# Phase 9 — IBAP Smart Wallet Execution Layer
+# Phase 9 — PayMaster Smart Wallet Execution Layer
 
-A simplified **smart wallet** used by IBAP for **controlled payment execution**.
+A simplified **smart wallet** used by PayMaster for **controlled payment execution**.
 This is a hackathon MVP: rather than a full ERC-4337 account-abstraction stack,
 it demonstrates the security primitives a production stack would build on
 (authz, replay protection, reentrancy guard, input validation, safe ERC-20

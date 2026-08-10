@@ -1,6 +1,6 @@
 // =============================================================================
 // POST /api/route/optim
-// IBAP Phase 7 — Deterministic Route Optimization Engine endpoint.
+// PayMaster Phase 7 — Deterministic Route Optimization Engine endpoint.
 //
 // Selects the best blockchain payment route from a set of valid candidate
 // routes (e.g. the Phase 6 planner's output, or direct route descriptions).
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Unexpected errors.
-    console.error("[IBAP-route] /api/route/optim unexpected error:", err);
+    console.error("[PayMaster-route] /api/route/optim unexpected error:", err);
     const message = err instanceof Error ? err.message : "Unexpected server error";
     return errorResponse("INTERNAL", message, undefined, 500);
   }

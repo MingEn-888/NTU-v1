@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Deterministic risk scoring & classification
+// PayMaster Phase 8 — Deterministic risk scoring & classification
 //
 //   RiskScore = CheckPoints  (0-50)   <- 7 checks (PASS=0 / WARN=half / FAIL=full)
 //             + RoutePoints  (0-25)   <- bridge/swap/approve structure

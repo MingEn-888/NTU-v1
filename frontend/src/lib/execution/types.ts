@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 10 — Human Approval & Blockchain Execution · domain types
+// PayMaster Phase 10 — Human Approval & Blockchain Execution · domain types
 //
 // This layer connects an APPROVED, RISK-CHECKED payment plan to the Phase 9
 // SmartWallet execution contract. The LLM NEVER executes: it produces the

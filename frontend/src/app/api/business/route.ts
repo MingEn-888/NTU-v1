@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     // Supabase unreachable (e.g. hosted project down / no connectivity) ->
     // degrade gracefully to the seeded demo context instead of a 500.
-    console.warn("[IBAP-business] Supabase unreachable, serving seed fallback:", err?.message);
+    console.warn("[PayMaster-business] Supabase unreachable, serving seed fallback:", err?.message);
     return seedFallback(address, `Supabase unreachable: ${err?.message ?? "unknown error"}`);
   }
 }

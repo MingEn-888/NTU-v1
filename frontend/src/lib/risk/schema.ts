@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 8 — Risk & Simulation Zod schemas
+// PayMaster Phase 8 — Risk & Simulation Zod schemas
 //
 // Every input to POST /api/risk/simulate is validated here, and every
 // SimulationResult is shape-checked before it can leave the service boundary.

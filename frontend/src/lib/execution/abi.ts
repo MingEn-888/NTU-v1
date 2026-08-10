@@ -1,5 +1,5 @@
 // =============================================================================
-// IBAP Phase 10 — SmartWallet ABI + deployment registry.
+// PayMaster Phase 10 — SmartWallet ABI + deployment registry.
 //
 // The Phase 9 SmartWallet (contracts/contracts/SmartWallet.sol) is the ONLY
 // execution path for approved payments. These ABIs are the minimal interface
