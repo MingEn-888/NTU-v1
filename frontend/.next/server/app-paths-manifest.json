@@ -1,14 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/chat/plan/route": "app/api/chat/plan/route.js",
-  "/api/chat/execute/route": "app/api/chat/execute/route.js",
-  "/api/chat/route": "app/api/chat/route.js",
-  "/page": "app/page.js",
   "/api/business/route": "app/api/business/route.js",
-  "/api/risk/simulate/route": "app/api/risk/simulate/route.js",
-  "/api/intent/parse/route": "app/api/intent/parse/route.js",
-  "/api/route/optim/route": "app/api/route/optim/route.js",
-  "/api/planner/route": "app/api/planner/route.js",
-  "/operations/page": "app/operations/page.js",
-  "/api/execution/route": "app/api/execution/route.js"
+  "/page": "app/page.js"
 }
