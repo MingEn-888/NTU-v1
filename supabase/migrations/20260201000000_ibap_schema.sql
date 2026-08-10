@@ -1,6 +1,6 @@
 -- Migration: 20260201000000_ibap_schema.sql
 -- Description: Complete Phase 2 IBAP Database Schema, Constraints, Triggers, and Row Level Security (RLS)
--- Agentic Payment Operations for Business: Payment Req -> AI Intent -> Payment Plan -> Route Options -> Risk Assessment -> Approval -> Execution -> Audit
+-- IBAP Payment Operations: Payment Req -> AI Intent -> Payment Plan -> Route Options -> Risk Assessment -> Approval -> Execution -> Audit
 
 -- Enable pgcrypto extension for UUID generation if needed
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
