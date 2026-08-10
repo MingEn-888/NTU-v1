@@ -1,3 +1,16 @@
+# Dependencies
 node_modules
+
+# Environment
 .env.local
 .env*.local
+
+# Next.js build output & cache (always regenerated)
+frontend/.next/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Hardhat cache & build artifacts (regenerated on compile)
+contracts/cache/
+contracts/artifacts/
