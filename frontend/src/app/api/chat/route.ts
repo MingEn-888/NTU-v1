@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/admin";
 import { parsePaymentIntent } from "@/lib/payment/intentParser";
 import { generatePaymentPlan } from "@/lib/payment/planGenerator";
 import {
@@ -58,7 +58,6 @@ async function fetchTreasuryUsd(businessId: string): Promise<number | undefined>
 // ---------------------------------------------------------------------------
 
 export async function GET(req: NextRequest) {
-  const supabaseAdmin = getSupabaseAdmin();
   const { searchParams } = new URL(req.url);
   const businessId = searchParams.get("businessId");
   const limit = Math.min(parseInt(searchParams.get("limit") || "200", 10), 500);
@@ -67,19 +66,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "businessId query parameter is required" }, { status: 400 });
   }
 
-  const { data, error } = await supabaseAdmin
-    .from("conversation_messages")
-    .select("*")
-    .eq("business_id", businessId)
-    .order("created_at", { ascending: true })
-    .limit(limit);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  // Supabase not configured -> no persisted history; degrade gracefully instead
+  // of failing the chat load.
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ success: true, messages: [], source: "fallback" });
   }
 
-  const messages: ChatMessage[] = (data || []).map(mapMessage);
-  return NextResponse.json({ success: true, messages });
+  const supabaseAdmin = getSupabaseAdmin();
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("conversation_messages")
+      .select("*")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: true })
+      .limit(limit);
+
+    if (error) {
+      return NextResponse.json({ success: true, messages: [], source: "fallback" });
+    }
+
+    const messages: ChatMessage[] = (data || []).map(mapMessage);
+    return NextResponse.json({ success: true, messages });
+  } catch (err: any) {
+    console.warn("[IBAP-chat] Supabase unreachable, returning empty history:", err?.message);
+    return NextResponse.json({ success: true, messages: [], source: "fallback" });
+  }
 }
 
 // ---------------------------------------------------------------------------

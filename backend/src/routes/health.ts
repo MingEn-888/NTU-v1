@@ -8,7 +8,7 @@ healthRouter.get("/health", (_req: Request, res: Response) => {
     success: true,
     data: {
       status: "HEALTHY",
-      service: "intent-agentic-payment-router-backend",
+      service: "intent-payment-router-backend",
       timestamp: Date.now(),
     },
     meta: {

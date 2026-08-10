@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /**
  * @title IntentRouter
- * @notice Entrypoint contract for executing agent-driven multi-chain payment intents
+ * @notice Entrypoint contract for executing validated multi-chain payment intents
  */
 contract IntentRouter {
     address public owner;

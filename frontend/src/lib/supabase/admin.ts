@@ -4,6 +4,13 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 // Next.js build-time errors when env variables are not present at build time.
 let cached: SupabaseClient | null = null;
 
+/** True when real Supabase env vars are present (not the placeholder fallbacks). */
+export function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  return url.length > 0 && !url.includes("placeholder") && key.length > 0 && !key.includes("placeholder");
+}
+
 export function getSupabaseAdmin(): SupabaseClient {
   if (cached) return cached;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-project.supabase.co";

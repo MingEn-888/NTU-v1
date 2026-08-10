@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isSupabaseConfigured } from "@/lib/supabase/admin";
 
 // Lazy initialization function to prevent Next.js build-time errors when env variables are not present
 function getSupabaseAdmin() {
@@ -13,15 +14,53 @@ function getSupabaseAdmin() {
   });
 }
 
+// -----------------------------------------------------------------------------
+// Seed fallback — mirrors supabase/seed.sql so the demo keeps working when
+// Supabase is not configured or unreachable (no .env.local / offline demo).
+// -----------------------------------------------------------------------------
+
+const SEED_PROFILE = {
+  id: "b2000000-0000-0000-0000-000000000001",
+  owner_user_id: "b1000000-0000-0000-0000-000000000001",
+  business_name: "TechCorp Solutions Sdn Bhd",
+  default_chain: "polygon",
+};
+
+const SEED_WALLET = {
+  id: "b3000000-0000-0000-0000-000000000001",
+  business_id: SEED_PROFILE.id,
+  address: "0x3c44cdd470368a0623a22d2c4022878d3f9905e5",
+  ens: "techcorp-treasury.eth",
+  chain_id: 137,
+  native_balance: 1250.5,
+};
+
+function seedFallback(address: string, reason: string) {
+  const wallet = address === SEED_WALLET.address ? SEED_WALLET : null;
+  return NextResponse.json({
+    success: true,
+    businessProfile: SEED_PROFILE,
+    wallet,
+    isFallback: true,
+    fallbackReason: reason,
+  });
+}
+
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const address = searchParams.get("address")?.toLowerCase();
+
+  if (!address) {
+    return NextResponse.json({ error: "Address query parameter is required" }, { status: 400 });
+  }
+
+  // Supabase not configured -> serve seeded demo data instead of failing.
+  if (!isSupabaseConfigured()) {
+    return seedFallback(address, "Supabase is not configured — serving seeded demo data");
+  }
+
   const supabaseAdmin = getSupabaseAdmin();
   try {
-    const { searchParams } = new URL(req.url);
-    const address = searchParams.get("address")?.toLowerCase();
-
-    if (!address) {
-      return NextResponse.json({ error: "Address query parameter is required" }, { status: 400 });
-    }
 
     // 1. Look up user by wallet address
     const { data: user, error: userError } = await supabaseAdmin
@@ -98,11 +137,23 @@ export async function GET(req: NextRequest) {
       isFallback: !user,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    // Supabase unreachable (e.g. hosted project down / no connectivity) ->
+    // degrade gracefully to the seeded demo context instead of a 500.
+    console.warn("[IBAP-business] Supabase unreachable, serving seed fallback:", err?.message);
+    return seedFallback(address, `Supabase unreachable: ${err?.message ?? "unknown error"}`);
   }
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "Supabase is not configured — wallet association is unavailable in offline demo mode. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to frontend/.env.local.",
+      },
+      { status: 503 }
+    );
+  }
   const supabaseAdmin = getSupabaseAdmin();
   try {
     const { businessId, address, chainId, ens, nativeBalance } = await req.json();

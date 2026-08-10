@@ -1,10 +1,12 @@
 # IBAP Database Entity Relationship & Lifecycle Architecture
 
 ## 1. Overview
-The IBAP (Intent-Based Agentic Payment) database is structured using **Supabase PostgreSQL** to support autonomous payment operations for business enterprises.
+The IBAP (Intent-Based Payment) database is structured using **Supabase PostgreSQL** to support deterministic, auditable payment operations for business enterprises.
 
-The entity relationships explicitly reflect the 8-stage agentic payment lifecycle:
+The entity relationships explicitly reflect the 8-stage payment lifecycle:
 **Payment Request → AI Intent → Payment Plan → Route Options → Risk Assessment → Approval → Execution (Txns) → Audit Logs**
+
+> **Trust boundary:** the AI only interprets the payment *intent*. Route selection is done by a deterministic weighted optimizer, and execution always requires human approval before any transaction is signed.
 
 ---
 
@@ -74,7 +76,7 @@ erDiagram
 - **RLS**: Restricted to business owner via `public.is_payment_request_owner(payment_request_id)`.
 
 ### 6. `payment_plans`
-- **Purpose**: Optimized multi-step plan compiled by Agentic Payment Router.
+- **Purpose**: Optimized multi-step plan compiled by the IBAP Payment Router.
 - **Primary Key**: `id` (UUID).
 - **Foreign Keys**: `payment_request_id` -> `payment_requests.id`, `selected_route_id` -> `route_options.id` (`ON DELETE SET NULL`, Deferrable).
 - **Attributes**: `total_estimated_gas`, `estimated_duration` (sec), `savings`, `explanation`, `risk_score` (0–100).
@@ -118,7 +120,7 @@ erDiagram
 - **RLS**: Restricted to business owner.
 
 ### 12. `audit_logs`
-- **Purpose**: Immutable security audit log tracking all agentic payment operations.
+- **Purpose**: Immutable security audit log tracking all approved payment operations.
 - **Primary Key**: `id` (UUID).
 - **Foreign Keys**: `business_id` -> `business_profiles.id`, `user_id` -> `users.id`, `payment_request_id` -> `payment_requests.id`.
 - **Attributes**: `event_type`, `description`, `meta` (JSONB).

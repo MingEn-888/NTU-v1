@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Bot,
   Cpu,
   DollarSign,
   Fuel,
+  Route,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -111,15 +111,17 @@ export default function Home() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs font-semibold">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>AI-Driven Cross-Chain Execution</span>
+            <span>AI parses intent · Math selects the route</span>
           </div>
 
           <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Intent-Based Agentic <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 via-brand-accent to-brand-cyan">Payment Router</span>
+            Intent-Based <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 via-brand-accent to-brand-cyan">Payment Router</span>
           </h1>
 
           <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-            Express your payment goals in natural language or structured parameters. Our multi-agent solvers evaluate DEX liquidity, gas costs, and bridge latencies to construct optimal execution routes in milliseconds.
+            Describe a payment in plain language. IBAP parses the intent into a structured request, generates
+            candidate routes, then a deterministic weighted model selects the cheapest, safest route. The AI only
+            interprets — you approve before any funds move, and the selected route executes deterministically.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -162,11 +164,11 @@ export default function Home() {
 
         <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-gray-400">
-            <span className="text-xs font-medium">Active Solvers</span>
+            <span className="text-xs font-medium">Route Selection</span>
             <Cpu className="h-4 w-4 text-brand-accent" />
           </div>
-          <div className="text-2xl font-bold text-white">12 Nodes</div>
-          <div className="text-xs text-emerald-400">99.98% Uptime</div>
+          <div className="text-2xl font-bold text-white">Deterministic</div>
+          <div className="text-xs text-emerald-400">Weighted · lower score wins</div>
         </div>
 
         <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
@@ -225,7 +227,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Quick Intent Preview & Solver Status Grid */}
+      {/* Quick Intent Preview & Routing Pipeline */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Intent Dispatch Card */}
         <div className="lg:col-span-2 glass-panel p-6 rounded-2xl border border-white/10 space-y-5">
@@ -353,37 +355,45 @@ export default function Home() {
           )}
         </div>
 
-        {/* Live Solver Status Feed */}
+        {/* Routing Pipeline */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 border-b border-white/10 pb-4">
-              <Bot className="h-5 w-5 text-brand-cyan" />
-              <h2 className="text-lg font-bold text-white">Agent Monitor</h2>
+              <Route className="h-5 w-5 text-brand-cyan" />
+              <h2 className="text-lg font-bold text-white">Routing Pipeline</h2>
             </div>
 
             <div className="mt-4 space-y-3">
               <div className="p-3 rounded-xl glass-card text-xs space-y-1">
                 <div className="flex items-center justify-between text-gray-300 font-semibold">
-                  <span>Solver Node #01</span>
-                  <span className="text-emerald-400">Active</span>
+                  <span>1 · Intent Parsing</span>
+                  <span className="text-emerald-400">AI interpret</span>
                 </div>
-                <p className="text-gray-400 text-[11px]">Evaluating Arbitrum -&gt; Polygon Liquidity Pools</p>
+                <p className="text-gray-400 text-[11px]">Natural language to a structured, validated intent</p>
               </div>
 
               <div className="p-3 rounded-xl glass-card text-xs space-y-1">
                 <div className="flex items-center justify-between text-gray-300 font-semibold">
-                  <span>Solver Node #02</span>
-                  <span className="text-emerald-400">Active</span>
+                  <span>2 · Candidate Routes</span>
+                  <span className="text-emerald-400">Generated</span>
                 </div>
-                <p className="text-gray-400 text-[11px]">Monitoring Gas Spikes on Base</p>
+                <p className="text-gray-400 text-[11px]">Planner builds viable multi-chain strategies</p>
               </div>
 
               <div className="p-3 rounded-xl glass-card text-xs space-y-1">
                 <div className="flex items-center justify-between text-gray-300 font-semibold">
-                  <span>Cross-Chain Bridge Engine</span>
-                  <span className="text-brand-cyan">Optimized</span>
+                  <span>3 · Deterministic Scoring</span>
+                  <span className="text-brand-cyan">Math decides</span>
                 </div>
-                <p className="text-gray-400 text-[11px]">Stargate / Across Aggregator Ready</p>
+                <p className="text-gray-400 text-[11px]">Weighted model selects the best route — not the AI</p>
+              </div>
+
+              <div className="p-3 rounded-xl glass-card text-xs space-y-1">
+                <div className="flex items-center justify-between text-gray-300 font-semibold">
+                  <span>4 · Approval & Execute</span>
+                  <span className="text-emerald-400">You sign</span>
+                </div>
+                <p className="text-gray-400 text-[11px]">Human approval, then the contract executes</p>
               </div>
             </div>
           </div>

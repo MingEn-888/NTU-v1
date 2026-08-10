@@ -3,8 +3,8 @@ import "./globals.css";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "IntentFlow - Agentic Payment Router",
-  description: "AI Intent-Based Cross-Chain Payment Router with Dynamic Path Optimization",
+  title: "IntentFlow - Payment Router",
+  description: "Intent-based payment router: AI parses intent, deterministic optimizer selects the route, you approve before execution.",
 };
 
 export default function RootLayout({
