@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
               PayMaster
             </span>
             <span className="px-2 py-0.5 text-[10px] font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30 rounded-full">
-              v2.0
+              v3.0
             </span>
           </div>
           <p className="text-xs text-gray-400 font-medium">AI Financial Assistant</p>

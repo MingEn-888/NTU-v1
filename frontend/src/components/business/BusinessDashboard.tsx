@@ -11,7 +11,6 @@ import { QuickActions } from "./QuickActions";
 import { PaymentCommand } from "./PaymentCommand";
 import { SettlementRails } from "./SettlementRails";
 import { SpendingInsights } from "./SpendingInsights";
-import { PaymentActivity } from "./PaymentActivity";
 import { ApprovalQueue } from "@/components/dashboard/ApprovalQueue";
 import { OptimizationMetrics } from "@/components/dashboard/OptimizationMetrics";
 import { RouteAnalytics } from "@/components/dashboard/RouteAnalytics";
@@ -136,13 +135,8 @@ export function BusinessDashboard() {
             <SettlementRails />
           </div>
 
-          {/* ======================= Activity + approvals ======================= */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            <div className="lg:col-span-2">
-              <PaymentActivity payments={data.recentPayments} />
-            </div>
-            <ApprovalQueue approvals={data.approvals} />
-          </div>
+          {/* ======================= Approval queue ======================= */}
+          <ApprovalQueue approvals={data.approvals} />
 
           {/* ======================= Insights + analytics ======================= */}
           <div id="analytics" className="scroll-mt-24">

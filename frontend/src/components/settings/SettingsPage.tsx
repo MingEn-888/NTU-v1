@@ -383,7 +383,7 @@ export function SettingsPage() {
             <div className="space-y-3 text-[12px] text-gray-400">
               <p>
                 Turn business payment instructions into optimised, explainable blockchain transactions.
-                v2.0 · multi-ecosystem routing · Light / Dark / System themes.
+                v3.0 · multi-ecosystem routing · Light / Dark / System themes.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Link href="/demo" className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-500/15 border border-brand-500/40 text-brand-200 text-[11px] font-bold hover:bg-brand-500/25 transition-colors">
