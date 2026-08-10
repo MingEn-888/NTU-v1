@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MessageSquareText,
   FileText,
@@ -49,6 +50,14 @@ export function PaymentCommandCenter() {
   const wallet = useWallet();
   const treasury = useTreasury(wallet.address, wallet.chainId, wallet.balance, wallet.tokenBalances);
   const [stage, setStage] = useState<OperationStage>("natural_language");
+
+  // Phase 11 — deep-linked from the dashboard AI command bar (?prompt=) and the
+  // approval queue (?review=). The prompt is pre-filled into the agent chat.
+  const searchParams = useSearchParams();
+  const initialPrompt = useMemo(() => {
+    const p = searchParams?.get("prompt");
+    return p ? p : undefined;
+  }, [searchParams]);
 
   const businessId = useMemo(
     () => treasury.businessProfile?.id || DEFAULT_BUSINESS_ID,
@@ -197,6 +206,7 @@ export function PaymentCommandCenter() {
               }}
               onOperationStageChange={setStage}
               simulationContext={treasury.treasuryContext}
+              initialPrompt={initialPrompt}
             />
           </div>
         </div>

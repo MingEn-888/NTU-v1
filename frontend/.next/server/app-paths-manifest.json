@@ -1,4 +1,9 @@
 {
+  "/operations/page": "app/operations/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/api/business/route": "app/api/business/route.js",
+  "/api/risk/simulate/route": "app/api/risk/simulate/route.js",
+  "/api/dashboard/route": "app/api/dashboard/route.js",
+  "/api/chat/route": "app/api/chat/route.js",
   "/page": "app/page.js"
 }

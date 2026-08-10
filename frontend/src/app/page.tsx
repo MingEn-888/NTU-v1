@@ -15,6 +15,7 @@ import {
   CheckCircle,
   XCircle,
   ExternalLink,
+  LayoutDashboard,
   MessageSquareText
 } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
@@ -126,8 +127,15 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Link
-              href="/operations"
+              href="/dashboard"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 via-brand-accent to-brand-cyan text-white text-sm font-bold shadow-glow hover:from-brand-500 hover:to-brand-500 transition-all"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Business Payments Dashboard
+            </Link>
+            <Link
+              href="/operations"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-bold hover:bg-white/10 hover:text-white transition-all"
             >
               <MessageSquareText className="h-4 w-4" />
               Open AI Payment Operations

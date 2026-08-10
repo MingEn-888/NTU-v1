@@ -41,6 +41,8 @@ interface ChatWindowProps {
   onOperationStageChange?: (stage: OperationStage) => void;
   /** Treasury context (assets / chains / gas) fed to the Phase 8 risk engine. */
   simulationContext?: SimulationTreasuryLike | null;
+  /** Phase 11 — deep-linked instruction (e.g. from the dashboard command bar). */
+  initialPrompt?: string;
 }
 
 const SUGGESTIONS = [
@@ -75,7 +77,7 @@ async function apiJson(url: string, init?: RequestInit, timeoutMs = 8000): Promi
   }
 }
 
-export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext }: ChatWindowProps) {
+export function ChatWindow({ businessId, businessName, wallet, onOperationStageChange, simulationContext, initialPrompt }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [sending, setSending] = useState(false);
@@ -89,6 +91,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const streamTimersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
+  const initialPromptSentRef = useRef(false);
 
   // --- Auto scroll -----------------------------------------------------------
   useEffect(() => {
@@ -263,6 +266,13 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     },
     [businessId, sending, startStreaming, onOperationStageChange, offlineMode, localProcessMessage, markOffline]
   );
+
+  // --- Phase 11 deep-link: auto-send the dashboard instruction once -----------
+  useEffect(() => {
+    if (!businessId || !initialPrompt || initialPromptSentRef.current || sending) return;
+    initialPromptSentRef.current = true;
+    handleSend(initialPrompt);
+  }, [businessId, initialPrompt, sending, handleSend]);
 
   // --- Generate payment plan --------------------------------------------------
   const handleGeneratePlan = useCallback(
