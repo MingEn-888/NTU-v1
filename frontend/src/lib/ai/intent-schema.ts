@@ -128,14 +128,14 @@ export const StructuredIntentSchema = z.object({
   confidence: z.number().min(0).max(1),
   missingInformation: z.array(z.string()),
   rawInput: z.string(),
-  /** "llm" = OpenAI structured output, "fallback" = deterministic parser (no key / outage). */
+  /** "llm" = Gemini structured output, "fallback" = deterministic parser (no key / outage). */
   source: z.enum(["llm", "fallback"]),
 });
 
 export type StructuredIntent = z.infer<typeof StructuredIntentSchema>;
 
 // -----------------------------------------------------------------------------
-// System prompt (OpenAI structured outputs)
+// System prompt (Gemini structured output)
 // -----------------------------------------------------------------------------
 
 export const INTENT_SYSTEM_PROMPT = `

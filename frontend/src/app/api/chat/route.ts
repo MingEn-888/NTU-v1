@@ -97,6 +97,37 @@ export async function GET(req: NextRequest) {
 // POST /api/chat -> send a message, parse intent, persist payment request
 // ---------------------------------------------------------------------------
 
+/** 503 offline contract used when the treasury store is unavailable. */
+function storeOfflineResponse() {
+  return NextResponse.json(
+    {
+      success: false,
+      offline: true,
+      message: "offline",
+      error: {
+        code: "STORE_OFFLINE",
+        message: "Treasury store is unavailable — parse this instruction locally (offline demo mode).",
+      },
+    },
+    { status: 503 }
+  );
+}
+
+/** True when a Supabase error means the store is not ready (missing tables / network). */
+function isStoreUnavailable(err: any): boolean {
+  if (!err) return false;
+  const msg = `${err.message || ""} ${err.code || ""}`.toLowerCase();
+  return (
+    msg.includes("could not find the table") ||
+    msg.includes("relation") ||
+    msg.includes("fetch failed") ||
+    msg.includes("failed to fetch") ||
+    msg.includes("econnrefused") ||
+    msg.includes("timed out") ||
+    msg.includes("network")
+  );
+}
+
 export async function POST(req: NextRequest) {
   // Supabase not configured -> respond fast so the client can parse locally
   // (offline demo mode) instead of waiting on a doomed network fetch.
@@ -137,7 +168,11 @@ export async function POST(req: NextRequest) {
       .select("id, business_name, default_chain")
       .eq("id", businessId)
       .maybeSingle();
-    if (bizErr || !business) {
+    if (bizErr) {
+      if (isStoreUnavailable(bizErr)) return storeOfflineResponse();
+      return NextResponse.json({ error: bizErr.message }, { status: 500 });
+    }
+    if (!business) {
       return NextResponse.json({ error: "Business profile not found" }, { status: 404 });
     }
 
@@ -148,6 +183,7 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
     if (userErr) {
+      if (isStoreUnavailable(userErr)) return storeOfflineResponse();
       return NextResponse.json({ error: userErr.message }, { status: 500 });
     }
 
@@ -171,6 +207,7 @@ export async function POST(req: NextRequest) {
         .select()
         .single();
       if (agentErr) {
+        if (isStoreUnavailable(agentErr)) return storeOfflineResponse();
         return NextResponse.json({ error: agentErr.message }, { status: 500 });
       }
       agentMessage = mapMessage(agentMsg);
@@ -194,6 +231,7 @@ export async function POST(req: NextRequest) {
         .select()
         .single();
       if (prErr) {
+        if (isStoreUnavailable(prErr)) return storeOfflineResponse();
         return NextResponse.json({ error: prErr.message }, { status: 500 });
       }
 
@@ -214,6 +252,7 @@ export async function POST(req: NextRequest) {
         .select()
         .single();
       if (intentErr) {
+        if (isStoreUnavailable(intentErr)) return storeOfflineResponse();
         return NextResponse.json({ error: intentErr.message }, { status: 500 });
       }
 
@@ -239,6 +278,7 @@ export async function POST(req: NextRequest) {
         .select()
         .single();
       if (agentErr) {
+        if (isStoreUnavailable(agentErr)) return storeOfflineResponse();
         return NextResponse.json({ error: agentErr.message }, { status: 500 });
       }
 
@@ -272,6 +312,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: agentMessage, operationStage });
   } catch (err: any) {
+    if (isStoreUnavailable(err)) return storeOfflineResponse();
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "intent-agentic-payment-router",
-  "version": "3.0.0",
+  "version": "1.3.2",
   "private": true,
   "description": "Intent-Based Agentic Payment Router Hackathon MVP Monorepo",
   "workspaces": [
