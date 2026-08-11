@@ -25,12 +25,12 @@ import { EcosystemNetworkPanel } from "@/components/web3/NetworkSelector";
 import { formatAddress } from "@/lib/utils";
 
 const SECTIONS = [
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "network", label: "Network", icon: Globe },
-  { id: "wallet", label: "Wallet", icon: Wallet },
-  { id: "notifications", label: "Notifications", icon: Bell },
   { id: "profile", label: "Profile", icon: User },
+  { id: "wallet", label: "Wallet", icon: Wallet },
   { id: "security", label: "Security", icon: ShieldCheck },
+  { id: "network", label: "Network", icon: Globe },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "appearance", label: "Appearance", icon: Palette },
   { id: "about", label: "About", icon: Info },
 ];
 
@@ -108,7 +108,7 @@ function SectionCard({
   );
 }
 
-/** Settings & Preferences screen — Appearance / Network / Wallet / Notifications / Profile / Security / About. */
+/** Settings & Preferences screen — Profile / Wallet / Security / Networks / Notifications / Appearance / About. */
 export function SettingsPage() {
   const wallet = useWallet();
   const treasury = useTreasury(wallet.address, wallet.chainId, wallet.balance, wallet.tokenBalances);
@@ -199,49 +199,41 @@ export function SettingsPage() {
 
         {/* ======================= Content ======================= */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Appearance */}
+          {/* Profile */}
           <SectionCard
-            id="appearance"
-            icon={Palette}
-            title="Appearance"
-            subtitle="Light, Dark or System — the whole interface adapts instantly."
+            id="profile"
+            icon={User}
+            title="Profile"
+            subtitle="The business operating this treasury."
           >
-            <ThemeToggle variant="full" className="max-w-sm" />
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              {[
-                { name: "Light", desc: "Pastel mint · deep purple ink", swatch: "bg-[#F0FFF1]" },
-                { name: "Dark", desc: "Black & deep purple · mint glow", swatch: "bg-[#240248]" },
-                { name: "System", desc: "Follows your device", swatch: "bg-gradient-to-r from-[#F0FFF1] to-[#240248]" },
-              ].map((s) => (
-                <div key={s.name} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-                  <div className={`h-10 rounded-lg border border-white/10 mb-2 ${s.swatch}`} />
-                  <div className="text-[11px] font-bold text-gray-100">{s.name}</div>
-                  <div className="text-[9px] text-gray-500">{s.desc}</div>
+            <div className="flex items-center gap-4">
+              <span className="h-14 w-14 rounded-2xl bg-gradient-to-br from-brand-600 via-brand-accent to-mint-300 flex items-center justify-center text-on-accent text-lg font-extrabold shadow-glow">
+                TC
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[15px] font-extrabold text-gray-100 truncate">
+                  {treasury.businessProfile?.business_name || "TechCorp Solutions Sdn Bhd"}
                 </div>
-              ))}
+                <div className="text-[12px] text-gray-500">
+                  Operator account · seeded treasury
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-300">
+                Verified
+              </span>
             </div>
-            <p className="mt-3 text-[11px] text-gray-500 leading-relaxed">
-              Palette: <code className="text-brand-cyan">#000000 · #240248 · #47038F · #5603AD · #8367C7 · #B3E9C7 · #BBF1C9 · #C2F8CB · #F0FFF1</code>
-            </p>
-          </SectionCard>
-
-          {/* Network */}
-          <SectionCard
-            id="network"
-            icon={Globe}
-            title="Networks"
-            subtitle="Multi-ecosystem routing — Ethereum, Solana, Polygon, BNB Chain and more."
-          >
-            <EcosystemNetworkPanel />
-            <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
-              <Landmark className="h-4.5 w-4.5 text-brand-cyan shrink-0 mt-0.5" />
-              <div>
-                <div className="text-[13px] font-bold text-gray-100">
-                  Default routing chain: <span className="text-brand-cyan capitalize">{treasury.preferredChain || "polygon"}</span>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="text-[10px] text-gray-500 font-semibold uppercase">Business ID</div>
+                <div className="text-[12px] font-mono text-gray-200 truncate mt-0.5">
+                  {treasury.businessProfile?.id || "b2000000-…-0001"}
                 </div>
-                <p className="text-[11px] text-gray-500 mt-0.5">
-                  Payouts are routed from the treasury vault. Bridge &amp; route comparison always runs before any transfer.
-                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="text-[10px] text-gray-500 font-semibold uppercase">Preferred chain</div>
+                <div className="text-[12px] font-bold text-brand-cyan capitalize mt-0.5">
+                  {treasury.preferredChain || "polygon"}
+                </div>
               </div>
             </div>
           </SectionCard>
@@ -292,61 +284,6 @@ export function SettingsPage() {
             </p>
           </SectionCard>
 
-          {/* Notifications */}
-          <SectionCard
-            id="notifications"
-            icon={Bell}
-            title="Notifications"
-            subtitle="Choose what the assistant keeps you posted about."
-          >
-            <div className="divide-y divide-white/5">
-              <ToggleRow title="Payment approvals" desc="Alert when a payment is waiting for your signature." checked={notif.approvals} onChange={setNotifKey("approvals")} />
-              <ToggleRow title="Route updates" desc="Notify when an optimised route is selected or changes." checked={notif.routeUpdates} onChange={setNotifKey("routeUpdates")} />
-              <ToggleRow title="Gas-saving opportunities" desc="Warn when network fees are low enough to batch approvals." checked={notif.gasAlerts} onChange={setNotifKey("gasAlerts")} />
-              <ToggleRow title="Risk alerts" desc="Immediate alert if a payment is flagged HIGH risk." checked={notif.riskAlerts} onChange={setNotifKey("riskAlerts")} />
-              <ToggleRow title="Weekly digest" desc="A summary of settled payments and gas saved every Monday." checked={notif.digest} onChange={setNotifKey("digest")} />
-            </div>
-          </SectionCard>
-
-          {/* Profile */}
-          <SectionCard
-            id="profile"
-            icon={User}
-            title="Profile"
-            subtitle="The business operating this treasury."
-          >
-            <div className="flex items-center gap-4">
-              <span className="h-14 w-14 rounded-2xl bg-gradient-to-br from-brand-600 via-brand-accent to-mint-300 flex items-center justify-center text-on-accent text-lg font-extrabold shadow-glow">
-                TC
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-extrabold text-gray-100 truncate">
-                  {treasury.businessProfile?.business_name || "TechCorp Solutions Sdn Bhd"}
-                </div>
-                <div className="text-[12px] text-gray-500">
-                  Operator account · seeded treasury
-                </div>
-              </div>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold text-emerald-300">
-                Verified
-              </span>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="text-[10px] text-gray-500 font-semibold uppercase">Business ID</div>
-                <div className="text-[12px] font-mono text-gray-200 truncate mt-0.5">
-                  {treasury.businessProfile?.id || "b2000000-…-0001"}
-                </div>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <div className="text-[10px] text-gray-500 font-semibold uppercase">Preferred chain</div>
-                <div className="text-[12px] font-bold text-brand-cyan capitalize mt-0.5">
-                  {treasury.preferredChain || "polygon"}
-                </div>
-              </div>
-            </div>
-          </SectionCard>
-
           {/* Security */}
           <SectionCard
             id="security"
@@ -371,6 +308,69 @@ export function SettingsPage() {
                 </div>
               ))}
             </div>
+          </SectionCard>
+
+          {/* Network */}
+          <SectionCard
+            id="network"
+            icon={Globe}
+            title="Networks"
+            subtitle="Multi-ecosystem routing — Ethereum, Solana, Polygon, BNB Chain and more."
+          >
+            <EcosystemNetworkPanel />
+            <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
+              <Landmark className="h-4.5 w-4.5 text-brand-cyan shrink-0 mt-0.5" />
+              <div>
+                <div className="text-[13px] font-bold text-gray-100">
+                  Default routing chain: <span className="text-brand-cyan capitalize">{treasury.preferredChain || "polygon"}</span>
+                </div>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  Payouts are routed from the treasury vault. Bridge &amp; route comparison always runs before any transfer.
+                </p>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* Notifications */}
+          <SectionCard
+            id="notifications"
+            icon={Bell}
+            title="Notifications"
+            subtitle="Choose what the assistant keeps you posted about."
+          >
+            <div className="divide-y divide-white/5">
+              <ToggleRow title="Payment approvals" desc="Alert when a payment is waiting for your signature." checked={notif.approvals} onChange={setNotifKey("approvals")} />
+              <ToggleRow title="Route updates" desc="Notify when an optimised route is selected or changes." checked={notif.routeUpdates} onChange={setNotifKey("routeUpdates")} />
+              <ToggleRow title="Gas-saving opportunities" desc="Warn when network fees are low enough to batch approvals." checked={notif.gasAlerts} onChange={setNotifKey("gasAlerts")} />
+              <ToggleRow title="Risk alerts" desc="Immediate alert if a payment is flagged HIGH risk." checked={notif.riskAlerts} onChange={setNotifKey("riskAlerts")} />
+              <ToggleRow title="Weekly digest" desc="A summary of settled payments and gas saved every Monday." checked={notif.digest} onChange={setNotifKey("digest")} />
+            </div>
+          </SectionCard>
+
+          {/* Appearance */}
+          <SectionCard
+            id="appearance"
+            icon={Palette}
+            title="Appearance"
+            subtitle="Light, Dark or System — the whole interface adapts instantly."
+          >
+            <ThemeToggle variant="full" className="max-w-sm" />
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              {[
+                { name: "Light", desc: "Pastel mint · deep purple ink", swatch: "bg-[#F0FFF1]" },
+                { name: "Dark", desc: "Black & deep purple · mint glow", swatch: "bg-[#240248]" },
+                { name: "System", desc: "Follows your device", swatch: "bg-gradient-to-r from-[#F0FFF1] to-[#240248]" },
+              ].map((s) => (
+                <div key={s.name} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className={`h-10 rounded-lg border border-white/10 mb-2 ${s.swatch}`} />
+                  <div className="text-[11px] font-bold text-gray-100">{s.name}</div>
+                  <div className="text-[9px] text-gray-500">{s.desc}</div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px] text-gray-500 leading-relaxed">
+              Palette: <code className="text-brand-cyan">#000000 · #240248 · #47038F · #5603AD · #8367C7 · #B3E9C7 · #BBF1C9 · #C2F8CB · #F0FFF1</code>
+            </p>
           </SectionCard>
 
           {/* About */}
