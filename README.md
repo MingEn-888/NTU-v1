@@ -1,10 +1,8 @@
-# PayMaster - Agentic Finance 
-
-**An AI-powered, intent-based payment routing platform that simplifies Web3 payment operations through intelligent intent processing, route optimization, risk assessment, approval workflows, and blockchain-based execution.**
-
+# PayMaster
+- An AI-powered, intent-based payment routing platform that simplifies Web3 payment operations through intelligent intent processing, route optimization, risk assessment, approval workflows, and blockchain-based execution.
 ---
 
-## 📋 Project Overview
+## Project Overview
 
 **PayMaster** is a full-stack Web3 payment platform designed to simplify the complexity of blockchain transactions.
 
@@ -24,7 +22,7 @@ The project is built as a monorepo containing a **Next.js frontend, Express back
 
 # 🎯 Platform Capabilities
 
-### 🤖 AI-Powered Intent Processing
+###  AI-Powered Intent Processing
 
 Transform natural-language payment requests into structured payment intents containing:
 
@@ -38,7 +36,7 @@ Transform natural-language payment requests into structured payment intents cont
 * Missing information
 * Original user input
 
-### 🧠 Intelligent Payment Planning
+###  Intelligent Payment Planning
 
 Generate and evaluate payment plans based on:
 
@@ -50,7 +48,7 @@ Generate and evaluate payment plans based on:
 * Risk score
 * Route recommendation
 
-### 🛣️ Payment Route Optimization
+###  Payment Route Optimization
 
 The system supports multiple candidate payment routes and compares their characteristics before selecting a recommended route.
 
@@ -93,51 +91,42 @@ The contracts implement authorization, transaction validation, nonce-based repla
 
 ---
 
-# 🔄 Payment Workflow
+#  Payment Workflow
 
 ```text
                     USER
-                      │
                       │ Natural Language Intent
                       ▼
              ┌──────────────────┐
              │ Payment Request  │
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Intent Processing│
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Payment Planning │
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Route Evaluation │
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Risk Assessment  │
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Approval         │
              └────────┬─────────┘
-                      │
                       ▼
              ┌──────────────────┐
              │ Transaction      │
              │ Execution        │
              └────────┬─────────┘
-                      │
                       ▼
                 BLOCKCHAIN
-                      │
                       ▼
              ┌──────────────────┐
              │ Audit / Activity │
@@ -152,7 +141,6 @@ The contracts implement authorization, transaction validation, nonce-based repla
 ┌──────────────────────────────────────────────────────────┐
 │                         USER                             │
 └───────────────────────────┬──────────────────────────────┘
-                            │
                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    NEXT.JS FRONTEND                      │
@@ -161,14 +149,12 @@ The contracts implement authorization, transaction validation, nonce-based repla
 │                                                          │
 │ Chat │ Planner │ Risk │ Wallet │ Web3 │ Execution        │
 └───────────────────────────┬──────────────────────────────┘
-                            │
                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    EXPRESS BACKEND                       │
 │                                                          │
 │                    REST API / Services                   │
 └───────────────┬──────────────────────────┬───────────────┘
-                │                          │
                 ▼                          ▼
 ┌──────────────────────────┐    ┌──────────────────────────┐
 │        SUPABASE          │    │       BLOCKCHAIN         │
@@ -182,66 +168,35 @@ The contracts implement authorization, transaction validation, nonce-based repla
 
 ---
 
-# 🔐 Smart Contract Architecture
+# Smart Contract Architecture
 
-## IntentRouter
+| File / Directory | Description |
+|---|---|
+| `contracts/SmartWallet.sol` | Core execution contract with owner and authorized executors, nonce-based replay protection, reentrancy guard, safe ERC-20 transfers, revert bubbling, and batch execution. |
+| `contracts/IntentRouter.sol` | Entrypoint contract for validated multi-chain payment intents with owner/solver authorization and `ExecutionStep`-based intent execution. |
+| `contracts/mocks/MockERC20.sol` | Mintable USDC-like ERC-20 mock token with 6 decimals for local testing. |
+| `contracts/mocks/ReentrancyAttacker.sol` | Malicious contract used to verify that the wallet's reentrancy protection works correctly. |
+| `test/SmartWallet.test.ts` | 23 unit tests covering execution, batching, token operations, authorization, nonce handling, and reentrancy protection. |
+| `scripts/deploy.ts` | Main deployment script. |
+| `scripts/deploySmartWallet.ts` | Deploys the wallet and mock token, funds the wallet, and writes deployment information to `deployments/localhost.json`. |
+| `scripts/exportAbi.ts` | Exports clean contract ABIs to the `abis/` directory. |
+| `abis/` | Contains exported ABIs such as `SmartWallet.json`, `MockERC20.json`, and `index.json`. |
+| `typechain-types/` | Auto-generated TypeChain typings for all contracts. |
 
-`IntentRouter.sol` acts as the routing and execution entry point for validated intent execution.
+--- 
 
-It supports:
-
-* Authorized solver execution
-* Batch execution
-* Transaction step validation
-* Execution events
-* Owner-controlled solver authorization
-
-Each execution step contains:
-
-```solidity
-struct ExecutionStep {
-    address targetContract;
-    bytes callData;
-    uint256 value;
-}
-```
-
-The router executes the provided steps sequentially and reverts if an execution step fails.
-
----
-
-## SmartWallet
-
-`SmartWallet.sol` provides controlled transaction execution.
-
-### Authorization
-
-Only authorized users or executors can initiate transactions.
-
-### Nonce Protection
-
-A monotonically increasing nonce prevents transaction replay.
-
-### Input Validation
-
-The contract validates:
-
-* Transaction targets
-* Transaction values
-* Transaction batches
-* Nonces
-* Required addresses
-
-### Reentrancy Protection
-
-Mutative operations are protected against reentrancy.
-
-### Batch Execution
-
-Multiple transactions can be executed as a controlled batch.
-
----
-
+# Documentation
+| Document | Description |
+|---|---|
+| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Complete system architecture covering high-level flow, repository layout, frontend, data model, `SmartWallet`, and trust boundaries. Includes Mermaid diagrams. |
+| [`ROADMAP.md`](./ROADMAP.md) | Complete 12-phase development roadmap with checkboxes. Includes detailed Phase 12 polish notes covering product identity, design system, UI primitives, edge cases, and demo walkthrough. |
+| [`AI_QUALITY_REVIEW.md`](./AI_QUALITY_REVIEW.md) | Full trust-boundary audit verifying that the LLM never executes transactions. Covers deterministic financial figures, routes, risk scores, Zod validation, and numeric stripping from AI-generated explanations. |
+| [`SMART_WALLET.md`](./SMART_WALLET.md) | Phase 9 `SmartWallet` specification covering interfaces, security properties, authorization, nonce replay protection, reentrancy protection, safe ERC-20 handling, events, and files. |
+| [`EXECUTION_ENGINE.md`](./EXECUTION_ENGINE.md) | Phase 10 execution safety model covering the human approval gate, six failure modes, error mapping, and on-chain status lifecycle. |
+| [`RISK_ENGINE.md`](./RISK_ENGINE.md) | Phase 8 risk evaluation covering seven deterministic checks, 0–100 risk scoring, simulation, and AI-generated explanations with numeric stripping. |
+| [`ROUTE_OPTIMIZER.md`](./ROUTE_OPTIMIZER.md) | Phase 7 deterministic route optimization covering the weighted scoring model, normalization, and chain-preference bonus. |
+| `ENTITY_RELATIONSHIPS.md` | Database entity relationships and overall data model. |
+| `DATABASE_TESTING.md` | Database testing notes and related test documentation. |
 # 🗄️ Database Architecture
 
 The Supabase database represents the complete payment-operation lifecycle.
@@ -276,22 +231,6 @@ Route Options    Risk Assessment
            Audit Log
 ```
 
-The repository contains migrations for:
-
-```text
-supabase/migrations/
-
-├── 20260101000000_init_schema.sql
-├── 20260201000000_ibap_schema.sql
-├── 20260809000000_ai_payment_operations.sql
-└── 20260810000000_phase10_execution.sql
-```
-
-The repository also contains demonstration data in:
-
-```text
-supabase/seed.sql
-```
 
 ---
 
@@ -362,12 +301,27 @@ NTU-v1/
 
 ---
 
+# 🛠 Sponsor Tools, APIs & Infrastructure Used
+| Tool/API | Usage |
+|---|---|
+| **Google Gemini** (`@google/generative-ai`) | LLM for intent extraction (Structured Outputs), planner strategy proposals, and risk explanation prose polishing |
+| **Supabase** | Hosted PostgreSQL database — business profiles, wallets, payment requests, intents, plans, routes, risk assessments, approvals, transactions, conversation messages, audit logs |
+| **OpenZeppelin (conceptual)** | SmartWallet security patterns (reentrancy guard, safe ERC-20, two-step ownership) — implemented from scratch without OZ imports |
+| **Hardhat** | Smart contract development, testing, and deployment |
+| **Ethers.js v6** | Blockchain interaction, SmartWallet contract calls |
+| **Next.js 14 (App Router)** | Full frontend framework with API routes |
+| **TailwindCSS** | Design system and styling |
+| **Recharts** | Dashboard charts (`AreaChart`, `BarChart`, `PieChart`) |
+| **Zod v4** | Runtime validation everywhere — API routes, LLM outputs, engine inputs/outputs |
+| **MetaMask** | Web3 wallet connection and transaction signing |
+| **TypeScript** | Entire codebase is strictly typed |
+
 # ⚡ Quick Start
 
 ## 1. Clone the Repository
 
 ```bash
-git clone https://github.com/MingEn-888/NTU-v1.git
+git clone https://github.com/Suanloh/NTU-v1.git
 cd NTU-v1
 ```
 
@@ -724,14 +678,15 @@ Audit Log
 
 ## Phase 4 — Future Development
 
-* [ ] Expand backend payment APIs
+* [ ] ERC-4337 Account Abstraction
 * [ ] Live blockchain route evaluation
 * [ ] Production wallet integration
 * [ ] Multi-chain support
 * [ ] Automated transaction monitoring
-* [ ] Advanced AI agent orchestration
-* [ ] Comprehensive end-to-end testing
-* [ ] Smart-contract security audit
+* [ ] Recurring Payment & Invoicing
+* [ ] Team-Based Approval Policies
+* [ ] Real-time FX & GAs Oracles
+* [ ] Mobile Wallet Integration
 
 ---
 
@@ -846,8 +801,15 @@ This project was developed as a hackathon prototype exploring the intersection o
 
 ---
 
+#  🔒 Trust Boundary Summary
+> The LLM interprets; deterministic code decides; a human approves; the SmartWallet executes.
+
+This principle is enforced at every layer — Zod validation on all LLM outputs, deterministic financial computation, stripNumbers() on AI prose, human approval gate before any on-chain action, and nonce-protected SmartWallet execution with full audit trail.
+
+
+---
 <p align="center">
 
-**Built with 🤖 AI + ⛓️ Blockchain + 💳 Intent-Based Payments**
+**Built with  LLM +  Blockchain +  Intent-Based Payments**
 
 </p>
