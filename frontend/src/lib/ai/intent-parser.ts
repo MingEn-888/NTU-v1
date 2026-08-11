@@ -2,7 +2,7 @@
 // PayMaster Phase 5 — Intent & Payment Extraction Engine (parser)
 //
 // The LLM interprets a natural-language business payment instruction and returns
-// a structured intent (OpenAI Structured Outputs, enforced by a Zod schema).
+// a structured intent (Gemini structured output, enforced by a Zod schema).
 // The LLM NEVER executes blockchain transactions — it only produces data.
 //
 // This module then runs a DETERMINISTIC validation + normalization pass that
@@ -12,12 +12,11 @@
 //   - recomputes `confidence` as a security guarantee
 //   - surfaces anything missing/ambiguous in `missingInformation`
 //
-// If no OPENAI_API_KEY is configured or the network fails, it degrades to the
+// If no GEMINI_API_KEY is configured or the network fails, it degrades to the
 // deterministic Phase-4 parser (source: "fallback") so the pipeline never dies.
 // =============================================================================
 
-import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod";
+import { geminiJson, GeminiError, isGeminiConfigured } from "./gemini";
 
 import {
   CURRENCY_ALIASES,
@@ -40,14 +39,14 @@ import { parsePaymentIntent } from "../payment/intentParser";
 // Config
 // -----------------------------------------------------------------------------
 
-const DEFAULT_MODEL = process.env.OPENAI_INTENT_MODEL || "gpt-4o-mini";
+const DEFAULT_MODEL = process.env.GEMINI_INTENT_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const FALLBACK_MAX_CONFIDENCE = 0.75; // deterministic-only parsing never reaches LLM certainty
 
 export interface ParseIntentOptions {
   text: string;
   /** Optional business scope — reserved for auditing / directory context. */
   businessId?: string;
-  /** Override the OpenAI model for this call. */
+  /** Override the Gemini model for this call. */
   model?: string;
   /** Force the deterministic fallback (used by self-tests / offline mode). */
   forceFallback?: boolean;
@@ -80,52 +79,40 @@ export async function parseIntentWithAI(options: ParseIntentOptions): Promise<St
     throw new IntentExtractionError("EMPTY_INPUT", "Instruction text is required.");
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || options.forceFallback) {
+  if (!isGeminiConfigured() || options.forceFallback) {
     return parseFallback(text);
   }
 
   let raw: RawLLMIntent;
   try {
-    const client = new OpenAI({ apiKey });
-    const completion = await client.chat.completions.parse({
+    const parsed = await geminiJson({
+      system: INTENT_SYSTEM_PROMPT,
+      user: text,
       model: options.model || DEFAULT_MODEL,
-      temperature: 0,
-      messages: [
-        { role: "system", content: INTENT_SYSTEM_PROMPT },
-        { role: "user", content: text },
-      ],
-      response_format: zodResponseFormat(RawLLMIntentSchema, "payment_intent"),
+      schema: RawLLMIntentSchema,
     });
-
-    const message = completion.choices[0]?.message;
-    if (message?.refusal) {
-      throw new IntentExtractionError("VALIDATION_FAILED", "The model refused to interpret the instruction.", {
-        refusal: message.refusal,
-      });
-    }
-    if (!message?.parsed) {
+    if (parsed === null) {
       throw new IntentExtractionError("VALIDATION_FAILED", "The model returned no structured intent.", {
-        finish_reason: completion.choices[0]?.finish_reason,
+        finish_reason: "no_json",
       });
     }
 
     // Defense-in-depth: re-validate the parsed object against the raw schema.
-    const parsed = RawLLMIntentSchema.safeParse(message.parsed);
-    if (!parsed.success) {
+    const checked = RawLLMIntentSchema.safeParse(parsed);
+    if (!checked.success) {
       throw new IntentExtractionError("VALIDATION_FAILED", "LLM output failed Zod validation.", {
-        issues: parsed.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
+        issues: checked.error.issues.map((i) => ({ path: i.path.join("."), message: i.message })),
       });
     }
-    raw = parsed.data;
+    raw = checked.data;
   } catch (err) {
     if (err instanceof IntentExtractionError) throw err;
-    const status = (err as { status?: number })?.status;
+    const status = err instanceof GeminiError ? err.status : (err as { status?: number })?.status;
     if (status === 429) {
-      throw new IntentExtractionError("RATE_LIMITED", "OpenAI rate limit reached — please retry shortly.", { status });
+      throw new IntentExtractionError("RATE_LIMITED", "Gemini rate limit reached — please retry shortly.", { status });
     }
-    // Any other OpenAI/network failure degrades gracefully to the deterministic parser.
-    console.error("[PayMaster-intent] OpenAI call failed, falling back to deterministic parser:", err);
+    // Any other Gemini/network failure degrades gracefully to the deterministic parser.
+    console.error("[PayMaster-intent] Gemini call failed, falling back to deterministic parser:", err);
     return parseFallback(text);
   }
 

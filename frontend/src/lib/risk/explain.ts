@@ -23,6 +23,7 @@
 
 import type { SimulationRequest, SimulationResult, SimulationAlternative } from "./types";
 import { SLIPPAGE_BPS_WARN } from "./catalog";
+import { geminiText, isGeminiConfigured } from "../ai/gemini";
 
 function fmtUsd(n: number): string {
   if (!isFinite(n)) return "$0.00";
@@ -207,15 +208,11 @@ export async function generateExplanation(
 ): Promise<GeneratedExplanation> {
   const deterministic = buildDeterministicExplanation(request, result);
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || apiKey.includes("placeholder")) {
+  if (!isGeminiConfigured()) {
     return { text: deterministic, source: "deterministic" };
   }
 
   try {
-    const { default: OpenAI } = await import("openai");
-    const client = new OpenAI({ apiKey });
-
     const dataForModel = {
       recipient: request.payment.recipient,
       recipientAddress: request.payment.recipientAddress,
@@ -230,28 +227,19 @@ export async function generateExplanation(
       transactionCount: result.totals.transactionCount,
     };
 
-    const completion = await client.chat.completions.create({
-      model: process.env.OPENAI_RISK_MODEL || "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are the PayMaster risk explanation writer. You explain WHY a payment plan is risky or safe for a business treasurer.\n" +
-            "CRITICAL RULES:\n" +
-            "1. Write plain-English QUALITATIVE prose only. NEVER output any number, currency amount, percentage, fee, rate or statistic.\n" +
-            "2. Base your reasoning EXCLUSIVELY on the validated simulation data provided in the JSON. Do not invent facts, prices, routes or warnings.\n" +
-            "3. Keep it to 2-4 short sentences. Do not restate the payment details the treasurer already sees.\n" +
-            "4. If the data says HIGH risk, say why and recommend careful human review.",
-        },
-        {
-          role: "user",
-          content: `Here is the validated simulation data:\n${JSON.stringify(dataForModel, null, 2)}\n\nWrite the qualitative risk explanation now.`,
-        },
-      ],
-    });
-
-    const prose = completion.choices?.[0]?.message?.content?.trim() ?? "";
+    const prose =
+      (await geminiText({
+        system:
+          "You are the PayMaster risk explanation writer. You explain WHY a payment plan is risky or safe for a business treasurer.\n" +
+          "CRITICAL RULES:\n" +
+          "1. Write plain-English QUALITATIVE prose only. NEVER output any number, currency amount, percentage, fee, rate or statistic.\n" +
+          "2. Base your reasoning EXCLUSIVELY on the validated simulation data provided in the JSON. Do not invent facts, prices, routes or warnings.\n" +
+          "3. Keep it to 2-4 short sentences. Do not restate the payment details the treasurer already sees.\n" +
+          "4. If the data says HIGH risk, say why and recommend careful human review.",
+        user: `Here is the validated simulation data:\n${JSON.stringify(dataForModel, null, 2)}\n\nWrite the qualitative risk explanation now.`,
+        model:
+          process.env.GEMINI_RISK_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash",
+      })) ?? "";
     const safeProse = stripNumbers(prose);
     if (safeProse.length < 10) {
       return { text: deterministic, source: "deterministic" };

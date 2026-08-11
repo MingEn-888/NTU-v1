@@ -9,12 +9,11 @@
 // builders below using the catalog in catalog.ts. Free-form LLM output can
 // NEVER become a blockchain transaction.
 //
-// No OPENAI_API_KEY / LLM failure / invalid strategy  ->  graceful fallback to
+// No GEMINI_API_KEY / LLM failure / invalid strategy  ->  graceful fallback to
 // the fully deterministic candidate generator (source: "deterministic").
 // =============================================================================
 
-import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod";
+import { geminiJson, GeminiError, isGeminiConfigured } from "../ai/gemini";
 
 import {
   chainById,
@@ -703,56 +702,46 @@ async function proposeStrategiesWithLLM(
   treasury: PlannerTreasuryContext,
   model?: string
 ): Promise<RawStrategy | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  if (!isGeminiConfigured()) return null;
 
-  const client = new OpenAI({ apiKey });
-  let completion;
   try {
-    completion = await client.chat.completions.parse({
-      model: model || process.env.OPENAI_PLANNER_MODEL || "gpt-4o-mini",
-      temperature: 0,
-      messages: [
-        { role: "system", content: PLANNER_SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: JSON.stringify({
-            intent: {
-              action: intent.action,
-              recipient: intent.recipient,
-              recipientAddress: intent.recipientAddress,
-              amount: intent.amount,
-              currency: intent.currency,
-              sourceCurrency: intent.sourceCurrency,
-              sourceAmount: intent.sourceAmount,
-              targetChain: intent.targetChain,
-              purpose: intent.purpose,
-              dueDate: intent.dueDate,
-            },
-            treasury: {
-              availableAssets: treasury.availableAssets,
-              preferredChain: treasury.preferredChain,
-              totalEstimatedUSDValue: treasury.totalEstimatedUSDValue,
-            },
-          }),
+    const parsed = await geminiJson({
+      system: PLANNER_SYSTEM_PROMPT,
+      user: JSON.stringify({
+        intent: {
+          action: intent.action,
+          recipient: intent.recipient,
+          recipientAddress: intent.recipientAddress,
+          amount: intent.amount,
+          currency: intent.currency,
+          sourceCurrency: intent.sourceCurrency,
+          sourceAmount: intent.sourceAmount,
+          targetChain: intent.targetChain,
+          purpose: intent.purpose,
+          dueDate: intent.dueDate,
         },
-      ],
-      response_format: zodResponseFormat(RawStrategySchema, "execution_strategies"),
+        treasury: {
+          availableAssets: treasury.availableAssets,
+          preferredChain: treasury.preferredChain,
+          totalEstimatedUSDValue: treasury.totalEstimatedUSDValue,
+        },
+      }),
+      model:
+        model || process.env.GEMINI_PLANNER_MODEL || process.env.GEMINI_MODEL || "gemini-2.5-flash",
+      schema: RawStrategySchema,
     });
+    if (parsed === null) return null;
+    const checked = RawStrategySchema.safeParse(parsed);
+    return checked.success ? checked.data : null;
   } catch (err) {
-    if ((err as { status?: number })?.status === 429) {
-      throw new PlannerError("RATE_LIMITED", "OpenAI rate limit reached during planning — please retry shortly.", {
+    if (err instanceof GeminiError && err.status === 429) {
+      throw new PlannerError("RATE_LIMITED", "Gemini rate limit reached during planning — please retry shortly.", {
         status: 429,
       });
     }
-    console.error("[PayMaster-planner] OpenAI strategy proposal failed, using deterministic candidates:", err);
+    console.error("[PayMaster-planner] Gemini strategy proposal failed, using deterministic candidates:", err);
     return null;
   }
-
-  const message = completion.choices[0]?.message;
-  if (message?.refusal || !message?.parsed) return null;
-  const parsed = RawStrategySchema.safeParse(message.parsed);
-  return parsed.success ? parsed.data : null;
 }
 
 /** Map validated LLM proposals to deterministic plans (guard rails included). */
