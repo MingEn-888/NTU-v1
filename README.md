@@ -1,5 +1,5 @@
 # PayMaster
-- An AI-powered, intent-based payment routing platform that simplifies Web3 payment operations through intelligent intent processing, route optimization, risk assessment, approval workflows, and blockchain-based execution.
+- An AI-powered, intent-based payment routing platform that simplifies Web3 payment operations through intelligent intent processing, route optimization, risk assessment, approval workflows, and blockchain-based executions.
 ---
 
 ## Project Overview
