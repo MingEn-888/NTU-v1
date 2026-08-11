@@ -170,8 +170,8 @@
 
   /* ---- Brand: medium purples for text, deep fills keep white glyphs ---- */
   --c-brand-50: 248 245 255;
-  --c-brand-100: 238 232 252;
-  --c-brand-200: 221 209 245;
+  --c-brand-100: 86 3 173; /* #5603AD — dark purple, readable on light surfaces */
+  --c-brand-200: 71 3 143; /* #47038F — deeper accent */
   --c-brand-300: 131 103 199; /* #8367C7 */
   --c-brand-400: 86 3 173; /* #5603AD */
   --c-brand-500: 86 3 173;
