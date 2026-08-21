@@ -16,6 +16,8 @@ export const SMART_WALLET_ABI = [
   "function batchExecute(tuple(address target, uint256 value, bytes data)[] txs, uint256 _nonce) external returns (bool)",
   "function approveToken(address token, address spender, uint256 amount, uint256 _nonce) external returns (bool)",
   "function transferToken(address token, address to, uint256 amount, uint256 _nonce) external returns (bool)",
+  "function depositYield(address vault, uint256 amount, uint256 _nonce) external returns (bool)",
+  "function withdrawYield(address vault, uint256 shares, uint256 _nonce) external returns (bool)",
   "function nonce() external view returns (uint256)",
   "function owner() external view returns (address)",
   "function getBalance() external view returns (uint256)",
@@ -26,6 +28,21 @@ export const SMART_WALLET_ABI = [
 export const ERC20_MIN_ABI = [
   "function balanceOf(address account) view returns (uint256)",
   "function decimals() view returns (uint8)",
+] as const;
+
+/** Phase 13 YieldVault minimal interface (contracts/contracts/YieldVault.sol). */
+export const YIELD_VAULT_ABI = [
+  "function deposit(uint256 amount) external returns (uint256 sharesMinted)",
+  "function withdraw(uint256 sharesToBurn) external returns (uint256 amount)",
+  "function setApy(uint256 bps) external",
+  "function setManager(address newManager) external",
+  "function asset() external view returns (address)",
+  "function manager() external view returns (address)",
+  "function apyBps() external view returns (uint256)",
+  "function apyPercent() external view returns (uint256)",
+  "function totalShares() external view returns (uint256)",
+  "function totalAssets() external view returns (uint256)",
+  "function shares(address) external view returns (uint256)",
 ] as const;
 
 // -----------------------------------------------------------------------------

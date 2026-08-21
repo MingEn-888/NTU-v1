@@ -143,11 +143,11 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  /* ---- Surfaces (frosted mint / white glass) ---- */
+  /* ---- Surfaces (frosted white / mint glass) ---- */
   --c-bg: 240 255 241; /* #F0FFF1 */
   --c-bg-2: 255 255 255;
   --c-bg-3: 187 241 201; /* #BBF1C9 */
-  --c-surface: 247 254 248; /* mint-tinted white */
+  --c-surface: 255 255 255;
   --c-surface-2: 255 255 255;
   --c-surface-3: 131 103 199;
   --c-inset: 36 2 72;
@@ -170,24 +170,24 @@
 
   /* ---- Brand: medium purples for text, deep fills keep white glyphs ---- */
   --c-brand-50: 248 245 255;
-  --c-brand-100: 86 3 173; /* #5603AD — dark purple, readable on light surfaces */
-  --c-brand-200: 71 3 143; /* #47038F — deeper accent */
+  --c-brand-100: 238 232 252;
+  --c-brand-200: 221 209 245;
   --c-brand-300: 131 103 199; /* #8367C7 */
   --c-brand-400: 86 3 173; /* #5603AD */
   --c-brand-500: 86 3 173;
   --c-brand-600: 71 3 143; /* #47038F */
   --c-brand-700: 36 2 72; /* #240248 */
   --c-brand-accent: 71 3 143;
-  --c-brand-emerald: 16 185 129; /* green accent */
-  --c-brand-cyan: 16 128 82; /* readable green (was purple) */
+  --c-brand-emerald: 71 3 143;
+  --c-brand-cyan: 86 3 173;
 
-  /* ---- Mint scale (green ramp) ---- */
+  /* ---- Mint scale (pastel tints) ---- */
   --c-mint-50: 240 255 241;
   --c-mint-100: 222 244 226;
   --c-mint-200: 194 248 203;
   --c-mint-300: 179 233 199;
-  --c-mint-400: 16 185 129;
-  --c-mint-500: 5 150 105;
+  --c-mint-400: 131 103 199;
+  --c-mint-500: 86 3 173;
 
   /* ---- Deep purple scale (light ramp) ---- */
   --c-deep-50: 250 247 255;
@@ -204,7 +204,7 @@
   /* ---- Semantic status (medium text tones for light surfaces) ---- */
   --c-success: 16 128 82;
   --c-success-soft: 187 241 201;
-  --c-success-border: 16 185 129;
+  --c-success-border: 131 103 199;
   --c-danger: 190 18 60;
   --c-danger-soft: 254 226 226;
   --c-danger-border: 244 63 94;
@@ -465,24 +465,6 @@ body {
   .text-on-accent {
     color: rgb(var(--c-on-accent));
   }
-
-  .mint-glow {
-    box-shadow: 0 0 24px rgb(var(--c-mint-300) / 0.45);
-  }
-
-  .mint-glass {
-    background: rgb(var(--c-mint-100) / 0.55);
-    border: 1px solid rgb(var(--c-mint-300) / 0.5);
-    backdrop-filter: blur(12px);
-  }
-}
-
-/* Lighter ambient wash for light mode — emphasise the mint/green palette. */
-[data-theme="light"] body {
-  background-image:
-    radial-gradient(at 0% 0%, rgb(86 3 173 / 0.08) 0px, transparent 52%),
-    radial-gradient(at 100% 0%, rgb(16 185 129 / 0.14) 0px, transparent 52%),
-    radial-gradient(at 55% 110%, rgb(179 233 199 / 0.4) 0px, transparent 58%);
 }
 
 /* ============================================================================

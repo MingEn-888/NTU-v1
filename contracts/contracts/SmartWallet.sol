@@ -92,6 +92,20 @@ contract SmartWallet {
         address indexed caller
     );
 
+    /// @notice Emitted when idle treasury tokens are swept into a yield vault.
+    event YieldDeposit(
+        address indexed vault,
+        uint256 amount,
+        address indexed caller
+    );
+
+    /// @notice Emitted when yield shares are redeemed back into the wallet.
+    event YieldWithdraw(
+        address indexed vault,
+        uint256 shares,
+        address indexed caller
+    );
+
     /// @notice Emitted when native currency is transferred out of the wallet.
     event NativeTransfer(
         address indexed to,
@@ -329,6 +343,62 @@ contract SmartWallet {
             "SW: transfer"
         );
         emit TokenTransfer(token, to, amount, msg.sender);
+        return true;
+    }
+
+    // ============================================================
+    // Core: yield automation (Phase 13, added 2026-08-21)
+    // ============================================================
+    /**
+     * @notice Sweep idle tokens into a yield vault. The wallet MUST have
+     *         approved `vault` for `amount` via approveToken() first.
+     * @dev The vault pulls `amount` from this wallet with transferFrom.
+     */
+    function depositYield(
+        address vault,
+        uint256 amount,
+        uint256 _nonce
+    )
+        external
+        onlyAuthorized
+        nonReentrant
+        validNonce(_nonce)
+        validAddress(vault)
+        returns (bool)
+    {
+        if (amount == 0) revert ZeroAmount();
+        _consumeNonce();
+        (bool success, bytes memory ret) = vault.call(
+            abi.encodeWithSignature("deposit(uint256)", amount)
+        );
+        if (!success) revert CallFailed(_decodeRevertReason(ret));
+        emit YieldDeposit(vault, amount, msg.sender);
+        return true;
+    }
+
+    /**
+     * @notice Redeem yield shares back into this wallet. The vault transfers
+     *         the pro-rata asset (principal + accrued yield) to the wallet.
+     */
+    function withdrawYield(
+        address vault,
+        uint256 shares_,
+        uint256 _nonce
+    )
+        external
+        onlyAuthorized
+        nonReentrant
+        validNonce(_nonce)
+        validAddress(vault)
+        returns (bool)
+    {
+        if (shares_ == 0) revert ZeroAmount();
+        _consumeNonce();
+        (bool success, bytes memory ret) = vault.call(
+            abi.encodeWithSignature("withdraw(uint256)", shares_)
+        );
+        if (!success) revert CallFailed(_decodeRevertReason(ret));
+        emit YieldWithdraw(vault, shares_, msg.sender);
         return true;
     }
 

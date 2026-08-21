@@ -31,7 +31,7 @@ export function Markdown({ children }: { children: string }) {
           ol: ({ children: c }) => <ol className="space-y-1 list-decimal pl-5 marker:text-brand-500">{c}</ol>,
           li: ({ children: c }) => <li className="leading-relaxed">{c}</li>,
           blockquote: ({ children: c }) => (
-            <blockquote className="border-l-2 border-amber-400/50 pl-3 py-0.5 text-amber-200/90 text-[12px] italic">
+            <blockquote className="border-l-2 border-amber-400/50 pl-3 py-0.5 text-warning text-[12px] italic">
               {c}
             </blockquote>
           ),

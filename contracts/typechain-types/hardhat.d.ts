@@ -33,6 +33,14 @@ declare module "hardhat/types/runtime" {
       name: "SmartWallet",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SmartWallet__factory>;
+    getContractFactory(
+      name: "IERC20Minimal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Minimal__factory>;
+    getContractFactory(
+      name: "YieldVault",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.YieldVault__factory>;
 
     getContractAt(
       name: "IntentRouter",
@@ -59,6 +67,16 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.SmartWallet>;
+    getContractAt(
+      name: "IERC20Minimal",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Minimal>;
+    getContractAt(
+      name: "YieldVault",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.YieldVault>;
 
     deployContract(
       name: "IntentRouter",
@@ -80,6 +98,14 @@ declare module "hardhat/types/runtime" {
       name: "SmartWallet",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SmartWallet>;
+    deployContract(
+      name: "IERC20Minimal",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Minimal>;
+    deployContract(
+      name: "YieldVault",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.YieldVault>;
 
     deployContract(
       name: "IntentRouter",
@@ -106,6 +132,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SmartWallet>;
+    deployContract(
+      name: "IERC20Minimal",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Minimal>;
+    deployContract(
+      name: "YieldVault",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.YieldVault>;
 
     // default types
     getContractFactory(

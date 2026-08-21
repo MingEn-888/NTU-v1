@@ -2,5 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as smartWalletSol from "./SmartWallet.sol";
+export * as yieldVaultSol from "./YieldVault.sol";
 export * as mocks from "./mocks";
 export { IntentRouter__factory } from "./IntentRouter__factory";

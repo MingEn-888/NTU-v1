@@ -34,7 +34,16 @@ async function main() {
   const usdcAddress = await usdc.getAddress();
   console.log(`[Hardhat] MockERC20 (mUSDC) deployed to: ${usdcAddress}`);
 
-  // ---- 3. Optional: authorize an executor (e.g. IntentRouter address) -------
+  // ---- 3. Deploy the yield vault (managed by the SmartWallet) --------------
+  const YieldVault = await ethers.getContractFactory("YieldVault");
+  const vault = await YieldVault.deploy(usdcAddress);
+  await vault.waitForDeployment();
+  const vaultAddress = await vault.getAddress();
+  await (await vault.setManager(walletAddress)).wait();
+  await (await vault.setApy(500)).wait(); // 5.00% deterministic demo APY
+  console.log(`[Hardhat] YieldVault deployed to: ${vaultAddress} (manager: ${walletAddress})`);
+
+  // ---- 4. Optional: authorize an executor (e.g. IntentRouter address) -------
   const executor = process.env.SMART_WALLET_EXECUTOR;
   if (executor) {
     if (!ethers.isAddress(executor)) {
@@ -44,7 +53,7 @@ async function main() {
     console.log(`[Hardhat] Executor authorized: ${executor}`);
   }
 
-  // ---- 4. Persist deployment addresses --------------------------------------
+  // ---- 5. Persist deployment addresses --------------------------------------
   const deploymentsDir = join(__dirname, "..", "deployments");
   if (!existsSync(deploymentsDir)) mkdirSync(deploymentsDir, { recursive: true });
   const record = {
@@ -52,13 +61,14 @@ async function main() {
     deployedAt: new Date().toISOString(),
     smartWallet: walletAddress,
     mockUSDC: usdcAddress,
+    yieldVault: vaultAddress,
     executor: executor ? executor : null,
   };
   const outPath = join(deploymentsDir, "localhost.json");
   writeFileSync(outPath, JSON.stringify(record, null, 2) + "\n");
   console.log(`[Hardhat] Deployment record written to ${outPath}`);
 
-  // ---- 5. Fund wallet for demo ----------------------------------------------
+  // ---- 6. Fund wallet for demo ----------------------------------------------
   const funding = ethers.parseEther("10");
   await (await deployer.sendTransaction({ to: walletAddress, value: funding })).wait();
   await (await usdc.mint(walletAddress, ethers.parseUnits("10000", 6))).wait();

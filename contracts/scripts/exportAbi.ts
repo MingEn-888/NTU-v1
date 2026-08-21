@@ -19,6 +19,7 @@ interface Artifact {
 
 const contractsToExport = [
   "contracts/SmartWallet.sol/SmartWallet.json",
+  "contracts/YieldVault.sol/YieldVault.json",
   "contracts/mocks/MockERC20.sol/MockERC20.json",
 ];
 

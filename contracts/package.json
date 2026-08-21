@@ -6,6 +6,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:wallet": "hardhat test test/SmartWallet.test.ts",
+    "test:yield": "hardhat test test/YieldVault.test.ts",
     "node": "hardhat node",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
     "deploy:wallet:local": "hardhat run scripts/deploySmartWallet.ts --network localhost",

@@ -1,5 +1,33 @@
+
+
+
 {
-  "framework": "nextjs",
+    "services": {
+        "frontend": {
+            "root": "frontend",
+            "framework": "nextjs"
+        },
+        "backend": {
+            "root": "backend"
+        }
+    },
+    "rewrites": [
+        {
+            "source": "/api/backend(/.*)?",
+            "destination": {
+                "type": "service",
+                "service": "backend"
+            }
+        },
+        {
+            "source": "/(.*)",
+            "destination": {
+                "type": "service",
+                "service": "frontend"
+            }
+        }
+    ],
+  "framework":"nextjs",
   "buildCommand": "npm run build --workspace=frontend",
   "installCommand": "npm install",
   "outputDirectory": "frontend/.next"

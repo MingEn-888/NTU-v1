@@ -44,6 +44,7 @@ export interface SmartWalletInterface extends Interface {
       | "approveToken"
       | "authorizedExecutors"
       | "batchExecute"
+      | "depositYield"
       | "executeTransaction"
       | "getBalance"
       | "getTokenBalance"
@@ -53,6 +54,7 @@ export interface SmartWalletInterface extends Interface {
       | "setExecutorAuthorization"
       | "transferOwnership"
       | "transferToken"
+      | "withdrawYield"
   ): FunctionFragment;
 
   getEvent(
@@ -65,6 +67,8 @@ export interface SmartWalletInterface extends Interface {
       | "TokenApproval"
       | "TokenTransfer"
       | "TransactionExecuted"
+      | "YieldDeposit"
+      | "YieldWithdraw"
   ): EventFragment;
 
   encodeFunctionData(
@@ -82,6 +86,10 @@ export interface SmartWalletInterface extends Interface {
   encodeFunctionData(
     functionFragment: "batchExecute",
     values: [SmartWallet.TransactionStruct[], BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositYield",
+    values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "executeTransaction",
@@ -113,6 +121,10 @@ export interface SmartWalletInterface extends Interface {
     functionFragment: "transferToken",
     values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawYield",
+    values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "acceptOwnership",
@@ -128,6 +140,10 @@ export interface SmartWalletInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "batchExecute",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositYield",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -155,6 +171,10 @@ export interface SmartWalletInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawYield",
     data: BytesLike
   ): Result;
 }
@@ -313,6 +333,42 @@ export namespace TransactionExecutedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace YieldDepositEvent {
+  export type InputTuple = [
+    vault: AddressLike,
+    amount: BigNumberish,
+    caller: AddressLike
+  ];
+  export type OutputTuple = [vault: string, amount: bigint, caller: string];
+  export interface OutputObject {
+    vault: string;
+    amount: bigint;
+    caller: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace YieldWithdrawEvent {
+  export type InputTuple = [
+    vault: AddressLike,
+    shares: BigNumberish,
+    caller: AddressLike
+  ];
+  export type OutputTuple = [vault: string, shares: bigint, caller: string];
+  export interface OutputObject {
+    vault: string;
+    shares: bigint;
+    caller: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface SmartWallet extends BaseContract {
   connect(runner?: ContractRunner | null): SmartWallet;
   waitForDeployment(): Promise<this>;
@@ -381,6 +437,12 @@ export interface SmartWallet extends BaseContract {
     "nonpayable"
   >;
 
+  depositYield: TypedContractMethod<
+    [vault: AddressLike, amount: BigNumberish, _nonce: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+
   executeTransaction: TypedContractMethod<
     [
       target: AddressLike,
@@ -425,6 +487,12 @@ export interface SmartWallet extends BaseContract {
     "nonpayable"
   >;
 
+  withdrawYield: TypedContractMethod<
+    [vault: AddressLike, shares_: BigNumberish, _nonce: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -451,6 +519,13 @@ export interface SmartWallet extends BaseContract {
     nameOrSignature: "batchExecute"
   ): TypedContractMethod<
     [txs: SmartWallet.TransactionStruct[], _nonce: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "depositYield"
+  ): TypedContractMethod<
+    [vault: AddressLike, amount: BigNumberish, _nonce: BigNumberish],
     [boolean],
     "nonpayable"
   >;
@@ -500,6 +575,13 @@ export interface SmartWallet extends BaseContract {
       amount: BigNumberish,
       _nonce: BigNumberish
     ],
+    [boolean],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "withdrawYield"
+  ): TypedContractMethod<
+    [vault: AddressLike, shares_: BigNumberish, _nonce: BigNumberish],
     [boolean],
     "nonpayable"
   >;
@@ -559,6 +641,20 @@ export interface SmartWallet extends BaseContract {
     TransactionExecutedEvent.InputTuple,
     TransactionExecutedEvent.OutputTuple,
     TransactionExecutedEvent.OutputObject
+  >;
+  getEvent(
+    key: "YieldDeposit"
+  ): TypedContractEvent<
+    YieldDepositEvent.InputTuple,
+    YieldDepositEvent.OutputTuple,
+    YieldDepositEvent.OutputObject
+  >;
+  getEvent(
+    key: "YieldWithdraw"
+  ): TypedContractEvent<
+    YieldWithdrawEvent.InputTuple,
+    YieldWithdrawEvent.OutputTuple,
+    YieldWithdrawEvent.OutputObject
   >;
 
   filters: {
@@ -648,6 +744,28 @@ export interface SmartWallet extends BaseContract {
       TransactionExecutedEvent.InputTuple,
       TransactionExecutedEvent.OutputTuple,
       TransactionExecutedEvent.OutputObject
+    >;
+
+    "YieldDeposit(address,uint256,address)": TypedContractEvent<
+      YieldDepositEvent.InputTuple,
+      YieldDepositEvent.OutputTuple,
+      YieldDepositEvent.OutputObject
+    >;
+    YieldDeposit: TypedContractEvent<
+      YieldDepositEvent.InputTuple,
+      YieldDepositEvent.OutputTuple,
+      YieldDepositEvent.OutputObject
+    >;
+
+    "YieldWithdraw(address,uint256,address)": TypedContractEvent<
+      YieldWithdrawEvent.InputTuple,
+      YieldWithdrawEvent.OutputTuple,
+      YieldWithdrawEvent.OutputObject
+    >;
+    YieldWithdraw: TypedContractEvent<
+      YieldWithdrawEvent.InputTuple,
+      YieldWithdrawEvent.OutputTuple,
+      YieldWithdrawEvent.OutputObject
     >;
   };
 }

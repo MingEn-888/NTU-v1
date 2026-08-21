@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { PrivacyProvider } from "@/lib/privacy";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 
 export const metadata: Metadata = {
@@ -43,9 +42,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-background text-foreground selection:bg-brand-500 selection:text-white">
         <ThemeProvider>
-          <PrivacyProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </PrivacyProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
         </ThemeProvider>
       </body>
     </html>

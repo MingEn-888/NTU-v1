@@ -22,6 +22,7 @@ import { mapEthersError } from "./errors";
 import {
   ERC20_MIN_ABI,
   SMART_WALLET_ABI,
+  YIELD_VAULT_ABI,
   isNativeAsset,
   resolveExecutionTokenAddress,
   resolveTokenDecimals,
@@ -77,6 +78,8 @@ export interface BuildExecutionPlanInput {
   chainId: number;
   smartWalletAddress: string;
   sourceLabel?: string;
+  /** Phase 13 — yield vault address (enables STAKE/UNSTAKE steps). */
+  yieldVaultAddress?: string | null;
 }
 
 /**
@@ -154,6 +157,23 @@ export function buildExecutionPlan(input: BuildExecutionPlanInput): ExecutionPla
       } else {
         description = "No ERC20 approval required for native settlement.";
       }
+    } else if ((action === "STAKE" || action === "UNSTAKE") && input.yieldVaultAddress) {
+      // Phase 13 — yield steps become real SmartWallet.executeTransaction calls
+      // to the vault (the calldata is known, unlike DEX/bridge steps).
+      const vault = input.yieldVaultAddress;
+      const fn = action === "STAKE" ? "deposit" : "withdraw";
+      const vaultData = new ethers.Interface(YIELD_VAULT_ABI).encodeFunctionData(fn, [amountWei]);
+      tx = {
+        target: vault,
+        value: "0",
+        data: vaultData,
+        label: `${action === "STAKE" ? "Deposit" : "Withdraw"} ${plan.settlementAmount} ${settlementAsset} in yield vault`,
+        token: tokenAddress,
+        amountWei,
+        kind: "executeTransaction",
+        to: vault,
+      };
+      description = `SmartWallet.executeTransaction → YieldVault.${fn}(${amountWei}).`;
     } else if (action === "SWAP" || action === "BRIDGE") {
       title = `${title} (external)`;
       description = `${description || "External swap/bridge step."} Requires DEX/bridge calldata — not executed by the direct wallet path.`;

@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as smartWalletSol from "./SmartWallet.sol";
 export type { smartWalletSol };
+import type * as yieldVaultSol from "./YieldVault.sol";
+export type { yieldVaultSol };
 import type * as mocks from "./mocks";
 export type { mocks };
 export type { IntentRouter } from "./IntentRouter";
@@ -16,3 +18,5 @@ export type { IERC20Minimal } from "./SmartWallet.sol/IERC20Minimal";
 export { IERC20Minimal__factory } from "./factories/SmartWallet.sol/IERC20Minimal__factory";
 export type { SmartWallet } from "./SmartWallet.sol/SmartWallet";
 export { SmartWallet__factory } from "./factories/SmartWallet.sol/SmartWallet__factory";
+export type { YieldVault } from "./YieldVault.sol/YieldVault";
+export { YieldVault__factory } from "./factories/YieldVault.sol/YieldVault__factory";
