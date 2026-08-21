@@ -9,6 +9,7 @@ import { SpendingInsights } from "@/components/business/SpendingInsights";
 import { OptimizationMetrics } from "@/components/dashboard/OptimizationMetrics";
 import { RouteAnalytics } from "@/components/dashboard/RouteAnalytics";
 import { PaymentHistory } from "@/components/payments/PaymentHistory";
+import { RecentComplianceDecisions } from "@/components/compliance/RecentComplianceDecisions";
 import {
   DashboardSkeleton,
   DemoBanner,
@@ -110,6 +111,9 @@ export function TransactionHistoryPage() {
 
       {/* ======================= Transaction history ======================= */}
       <PaymentHistory />
+
+      {/* ======================= Compliance decisions ======================= */}
+      <RecentComplianceDecisions />
     </div>
   );
 }
