@@ -72,6 +72,8 @@ export function buildPlanNarration(intent: ParsedPaymentIntent, plan: PaymentPla
     lines.push(`> ⚠️ ${plan.risk.warnings.join(" · ")}`);
   }
   lines.push("");
+  lines.push("Before approval, the transfer passes through the **DPT compliance layer** — counterparty screening, transaction monitoring, policy checks and Travel Rule verification. A **blocked** decision prevents execution entirely.");
+  lines.push("");
   lines.push("Review the plan and hit **Approve & Execute** to authorise the payout from the treasury vault. Nothing is sent until you approve.");
   return lines.join("\n");
 }

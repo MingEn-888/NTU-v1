@@ -26,6 +26,7 @@ interface ChatMessageProps {
   txResult?: ExecutionResult | null;
   simulationContext?: SimulationTreasuryLike | null;
   executionPlan?: ExecutionPlan | null;
+  businessId?: string | null;
 }
 
 export function ChatMessage({
@@ -39,6 +40,7 @@ export function ChatMessage({
   txResult,
   simulationContext,
   executionPlan,
+  businessId,
 }: ChatMessageProps) {
   const isUser = message.role === "user";
 
@@ -117,6 +119,7 @@ export function ChatMessage({
                     error={txResult?.error}
                     simulationContext={simulationContext}
                     executionPlan={executionPlan}
+                    businessId={businessId}
                   />
                 </div>
               )}

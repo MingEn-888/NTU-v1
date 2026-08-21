@@ -34,6 +34,7 @@ export const Sidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { id: "compliance", label: "Compliance", icon: ShieldCheck, href: "/compliance", badge: "Layer" },
     { id: "demo", label: "Product Demo", icon: PlayCircle, href: "/demo", badge: "Walkthrough" },
     { id: "create", label: "New Intent", icon: Send, href: "/operations", badge: "Live" },
     { id: "history", label: "Tx History", icon: History, href: "/history" },

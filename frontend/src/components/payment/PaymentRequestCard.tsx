@@ -18,6 +18,7 @@ import {
   Wallet,
   Zap,
   ExternalLink,
+  Ban,
 } from "lucide-react";
 import type { ParsedPaymentIntent, PaymentPlan, PaymentStep, RiskAssessment } from "@/lib/payment/types";
 import { currencySymbol } from "@/lib/payment/planGenerator";
@@ -28,6 +29,8 @@ import type { SimulationResult } from "@/lib/risk/types";
 import type { ExecutionPlan } from "@/lib/execution/types";
 import { ApprovalPanel } from "@/components/execution/ApprovalPanel";
 import { ExecutionFlowTimeline, type ExecutionFlowStage } from "@/components/execution/ExecutionFlowTimeline";
+import { ComplianceGate } from "@/components/compliance/ComplianceGate";
+import type { ComplianceAssessment } from "@/lib/compliance/types";
 
 export type PaymentCardPhase = "detected" | "plan" | "executing" | "complete" | "failed";
 
@@ -46,6 +49,8 @@ interface PaymentRequestCardProps {
   simulationContext?: SimulationTreasuryLike | null;
   /** Phase 10 — validated execution plan ready for the explicit approval gate. */
   executionPlan?: ExecutionPlan | null;
+  /** Business id used to persist compliance audit records. */
+  businessId?: string | null;
 }
 
 const PHASE_META: Record<PaymentCardPhase, { label: string; className: string; dot: string }> = {
@@ -127,6 +132,7 @@ export default function PaymentRequestCard({
   txHash,
   explorerUrl,
   error,
+  businessId,
   simulationContext,
   executionPlan,
 }: PaymentRequestCardProps) {
@@ -152,6 +158,15 @@ export default function PaymentRequestCard({
   useEffect(() => {
     setApprovalArmed(false);
   }, [plan, phase]);
+
+  // DPT Compliance Layer — deterministic screening / monitoring / policy /
+  // travel rule decision. A BLOCK decision prevents execution entirely.
+  const [complianceAssessment, setComplianceAssessment] = useState<ComplianceAssessment | null>(null);
+  useEffect(() => {
+    setComplianceAssessment(null);
+  }, [plan, phase]);
+  const complianceBlocked = complianceAssessment?.decision === "BLOCK";
+  const complianceReview = complianceAssessment?.decision === "REVIEW";
 
   // Derive the execution timeline stage from the card phase + approval state.
   const timelineStage: ExecutionFlowStage =
@@ -365,10 +380,34 @@ export default function PaymentRequestCard({
               {plan.explanation}
             </p>
 
+            {/* DPT Compliance Layer — deterministic screening, monitoring,
+                policy + travel rule decision that sits BETWEEN the intent and
+                blockchain execution. BLOCK prevents the approval/execution path. */}
+            {phase === "plan" && (
+              <ComplianceGate
+                intent={intent}
+                plan={plan}
+                simulationContext={simulationContext}
+                businessId={businessId}
+                onResult={setComplianceAssessment}
+              />
+            )}
+
+            {/* Compliance BLOCK gate — a BLOCK decision prevents execution. */}
+            {phase === "plan" && complianceBlocked && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+                <Ban className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                <div className="text-[12px] text-red-300 leading-snug">
+                  <strong>Execution blocked by compliance policy.</strong> This transfer cannot be executed.
+                  {complianceReview ? "" : " See the compliance pipeline above for the flagged reasons."}
+                </div>
+              </div>
+            )}
+
             {/* Phase 8 — Risk evaluation & simulation BEFORE approval. The
                 engine never auto-executes: the human must Review Payment, then
                 Confirm & Sign, and finally Approve & exec in the Phase 10 gate. */}
-            {phase === "plan" && simRequest && (
+            {phase === "plan" && simRequest && !complianceBlocked && (
               <>
                 <RiskSimulationPanel
                   request={simRequest}

@@ -1,5 +1,28 @@
 # IMPLEMENTATION ROADMAP
+- [x] Phase 14: DPT Treasury Compliance Layer (2026-08-21)
+- [x] Phase 13: Yield Automation (2026-08-21)
 - [x] Phase 1: Workspace & Monorepo Setup
+
+## Phase 14 — DPT Treasury Compliance Layer (2026-08-21)
+- New engines `frontend/src/lib/compliance/`: counterparty screening (simulated),
+  transaction monitoring (deterministic signals), unified 0-100 risk score
+  (LOW/MEDIUM/HIGH/CRITICAL), policy engine (ALLOW/REVIEW/BLOCK), Travel Rule
+  (simulated), portfolio monitoring, orchestrator, audit event builder.
+- Policy engine is the deterministic decision-maker; the LLM can only explain
+  post-decision. `BLOCK` prevents execution; `REVIEW` requires human approval;
+  `ALLOW` still uses the existing approval gate.
+- APIs: `POST /api/compliance/assess`, `GET /api/compliance/audit`,
+  `GET /api/compliance/portfolio`.
+- Migration `20260822000000_compliance_layer.sql`: 6 new compliance tables with
+  RLS. Existing `audit_logs` kept.
+- UI: `/compliance` dashboard (evaluate tool + compliance pipe + screening /
+  monitoring / risk / policy / travel rule panels + portfolio monitor),
+  `/compliance/audit` (filterable audit log), `ComplianceGate` inside
+  `PaymentRequestCard` (BLOCK disables approval/execution), sidebar entry.
+- AI advisor narration references the compliance layer; per-transfer AI
+  explanations attached after the deterministic decision.
+- Selftest `scripts/compliance-selftest.ts` (72 checks). Doc:
+  `docs/COMPLIANCE_LAYER.md`.
 - [x] Phase 2: PayMaster Database & Supabase Setup
 - [x] Phase 3: MetaMask & Web3 Integration
 - [x] Phase 4: AI Chat Interface

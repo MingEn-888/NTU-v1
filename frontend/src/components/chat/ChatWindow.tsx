@@ -596,6 +596,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
             txResult={executionResults[m.id] || null}
             simulationContext={simulationContext}
             executionPlan={executionPlans[m.id] || null}
+            businessId={businessId}
           />
         ))}
 
