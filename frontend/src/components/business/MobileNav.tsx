@@ -7,7 +7,7 @@ import { Home, Send, BarChart3, User } from "lucide-react";
 
 const TABS = [
   { id: "home", label: "Home", icon: Home, href: "/dashboard" },
-  { id: "payments", label: "Payments", icon: Send, href: "/payments" },
+  { id: "payments", label: "Payments", icon: Send, href: "/history" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
   { id: "profile", label: "Profile", icon: User, href: "/settings" },
 ];

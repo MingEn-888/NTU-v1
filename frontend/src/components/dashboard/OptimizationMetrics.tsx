@@ -19,7 +19,7 @@ export function OptimizationMetrics({
 }) {
   if (isLoading || !metrics) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {[0, 1, 2, 3].map((i) => (
           <BlockSkeleton key={i} className="h-28" />
         ))}
@@ -65,7 +65,7 @@ export function OptimizationMetrics({
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 gap-4">
       {cards.map((c) => (
         <StatCard
           key={c.label}

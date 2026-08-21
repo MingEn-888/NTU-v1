@@ -36,7 +36,7 @@ export const Sidebar: React.FC = () => {
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { id: "demo", label: "Product Demo", icon: PlayCircle, href: "/demo", badge: "Walkthrough" },
     { id: "create", label: "New Intent", icon: Send, href: "/operations", badge: "Live" },
-    { id: "history", label: "Tx History", icon: History, href: "/dashboard" },
+    { id: "history", label: "Tx History", icon: History, href: "/history" },
     { id: "settings", label: "Preferences", icon: Settings, href: "/settings" },
   ];
 
@@ -49,20 +49,6 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <nav className="space-y-1.5">
-          {/* Business Payment Operations — primary surface */}
-          <Link
-            href="/dashboard"
-            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-brand-600/30 to-mint-300/10 border border-brand-500/40 shadow-glow text-gray-100 transition-all duration-150 hover:from-brand-600/40 hover:to-mint-300/20"
-          >
-            <div className="flex items-center gap-3">
-              <LayoutDashboard className="h-4 w-4 text-brand-cyan" />
-              <span>Business Payments</span>
-            </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-500 text-on-accent">
-              Core
-            </span>
-          </Link>
-
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =

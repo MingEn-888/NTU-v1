@@ -98,7 +98,7 @@ export function TreasuryHero({ treasury, approvals, isLoading }: TreasuryHeroPro
           <div className="flex items-center gap-2">
             <Link
               href="/operations"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white text-brand-700 text-[12px] font-extrabold shadow-lg hover:bg-mint-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white text-white text-[12px] font-extrabold shadow-lg hover:bg-brand-500/20 transition-colors"
             >
               <Plus className="h-4 w-4" /> Add Funds
             </Link>
