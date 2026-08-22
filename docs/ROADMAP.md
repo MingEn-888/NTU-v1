@@ -42,6 +42,6 @@
 - Operations page: removed always-on static risk demo panel; consumed `?review=` deep link; product copy for phase badges.
 - Edge cases: wallet input validation (recipient/amount), no fake balances on unsupported chains, empty-account guard, unhandled-promise fixes (Navbar, WalletCard, NetworkSelector, PaymentCommandCenter).
 - AI quality review: `docs/AI_QUALITY_REVIEW.md` (LLM never executes; deterministic finance; Zod everywhere).
-- Product demo: `/demo` page + `src/lib/demo/{types,engine}.ts` + `src/components/demo/DemoWalkthrough.tsx` driving the REAL engines for "Pay Alice RM2,500 for invoice INV-1024 by Friday." (13 stages) + `scripts/demo-selftest.ts` (47 checks passing).
+- Product demo: `/demo` page + `src/lib/demo/{types,engine}.ts` + `src/components/demo/DemoWalkthrough.tsx` driving the REAL engines for "Pay Alice $2,500 for invoice INV-1024 by Friday." (14 stages; the compliance layer — counterparty screening, monitoring, compliance risk, policy, Travel Rule + decision — is merged into ONE stage that runs BEFORE route optimization) + `scripts/demo-selftest.ts` (57 checks passing).
 - Docs: `docs/ARCHITECTURE.md` rewritten (accurate, no shadcn claim); `docs/PHASE12_POLISH.md` added.
 - Verification: `frontend` + `backend` `tsc --noEmit` clean; demo/dev UI validated in-browser (/, /operations, /dashboard, /demo).

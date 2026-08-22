@@ -90,14 +90,73 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
   const [offlineMode, setOfflineMode] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
   const streamTimersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
   const initialPromptSentRef = useRef(false);
 
   // --- Auto scroll -----------------------------------------------------------
-  useEffect(() => {
+  // Scroll to bottom when new content arrives. Include generatingPlanMsgId so
+  // the "Generating Payment Plan…" state also keeps the plan button in view.
+  const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, sending, executingMsgId, loadingHistory]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, sending, executingMsgId, loadingHistory, generatingPlanMsgId, scrollToBottom]);
+
+  // Track whether the operator is pinned to the bottom of the conversation so
+  // auto-scroll never fights them while they read earlier messages. Only real
+  // user gestures (wheel / touch) change the pinned state — programmatic scrolls
+  // and the async growth that follows them never do.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let touchStartY: number | null = null;
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY < 0) {
+        stickToBottomRef.current = false; // scrolled up
+      } else if (el.scrollHeight - el.scrollTop - el.clientHeight < 80) {
+        stickToBottomRef.current = true; // reached the bottom
+      }
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY;
+      if (touchStartY === null || y === undefined) return;
+      const dy = y - touchStartY; // finger moves down => scrolling up
+      touchStartY = y;
+      if (dy > 4) stickToBottomRef.current = false;
+    };
+    el.addEventListener("wheel", onWheel, { passive: true });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, []);
+
+  // The Compliance pipeline & Risk & Simulation panels resolve asynchronously
+  // and grow the conversation height AFTER the plan appears. Poll the content
+  // height and re-pin to the bottom while the operator is pinned, so the
+  // generated results stay in view with no manual scrolling.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let lastHeight = el.scrollHeight;
+    const id = setInterval(() => {
+      if (el.scrollHeight !== lastHeight) {
+        lastHeight = el.scrollHeight;
+        if (stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+      }
+    }, 200);
+    return () => clearInterval(id);
+  }, []);
 
   // --- Cleanup stream timers on unmount --------------------------------------
   useEffect(() => {
@@ -573,39 +632,44 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
   return (
     <div className="flex flex-col h-full">
       {/* Conversation scroll area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-1 pb-4 space-y-5 min-h-0">
-        {loadingHistory && (
-          <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
-            <span className="h-5 w-5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
-            <span className="text-sm">Restoring conversation…</span>
-          </div>
-        )}
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-1 pb-4 min-h-0 [overflow-anchor:none]"
+      >
+        <div className="space-y-5">
+          {loadingHistory && (
+            <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
+              <span className="h-5 w-5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
+              <span className="text-sm">Restoring conversation…</span>
+            </div>
+          )}
 
-        {empty && <EmptyState businessName={businessName} />}
+          {empty && <EmptyState businessName={businessName} />}
 
-        {messages.map((m, i) => (
-          <ChatMessage
-            key={m.id}
-            message={m}
-            isLast={i === messages.length - 1}
-            cardPhase={phaseFor(m)}
-            generatingPlan={generatingPlanMsgId === m.id}
-            onGeneratePlan={handleGeneratePlan}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            txResult={executionResults[m.id] || null}
-            simulationContext={simulationContext}
-            executionPlan={executionPlans[m.id] || null}
-            businessId={businessId}
-          />
-        ))}
+          {messages.map((m, i) => (
+            <ChatMessage
+              key={m.id}
+              message={m}
+              isLast={i === messages.length - 1}
+              cardPhase={phaseFor(m)}
+              generatingPlan={generatingPlanMsgId === m.id}
+              onGeneratePlan={handleGeneratePlan}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              txResult={executionResults[m.id] || null}
+              simulationContext={simulationContext}
+              executionPlan={executionPlans[m.id] || null}
+              businessId={businessId}
+            />
+          ))}
 
-        {sending && (
-          <div className="flex items-center gap-2 text-gray-500 text-xs px-1">
-            <span className="h-3.5 w-3.5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
-            <span>PayMaster is thinking…</span>
-          </div>
-        )}
+          {sending && (
+            <div className="flex items-center gap-2 text-gray-500 text-xs px-1">
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
+              <span>PayMaster is thinking…</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Notice banner */}

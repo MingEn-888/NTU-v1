@@ -11,6 +11,7 @@ import {
   Calculator,
   CheckCircle2,
   ShieldAlert,
+  ShieldCheck,
   FlaskConical,
   Sparkles,
   PenLine,
@@ -31,7 +32,14 @@ import { buildExplorerUrl } from "@/lib/payment/execution";
 import { Banner } from "@/components/ui/banner";
 import { SkeletonText } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { formatAddress } from "@/lib/utils";
+import { cn, formatAddress } from "@/lib/utils";
+import { CompliancePipe } from "@/components/compliance/CompliancePipe";
+import { CounterpartyPanel } from "@/components/compliance/CounterpartyPanel";
+import { MonitoringPanel } from "@/components/compliance/MonitoringPanel";
+import { RiskSummaryPanel } from "@/components/compliance/RiskSummaryPanel";
+import { PolicyPanel } from "@/components/compliance/PolicyPanel";
+import { TravelRulePanel } from "@/components/compliance/TravelRulePanel";
+import { DecisionBadge, ToneBadge } from "@/components/compliance/ui";
 
 function fmtUsd(n: number): string {
   return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -45,6 +53,56 @@ const RISK_TONE: Record<string, "emerald" | "amber" | "red"> = {
   MEDIUM: "amber",
   HIGH: "red",
 };
+
+/** The 9-step primary workflow map — compliance merged into one layer, route optimization AFTER it. */
+const WORKFLOW_STEPS: { label: string; sub?: string[]; description: string }[] = [
+  {
+    label: "Payment Instruction",
+    description:
+      "The operator types a business payment in plain English — no forms, no addresses to look up. The agent understands business language such as “Pay Alice $2,500 for invoice INV-1024 by Friday.”",
+  },
+  {
+    label: "AI Intent",
+    description:
+      "The sentence is converted into a structured, validated intent. Recipient, amount, currency, invoice and deadline are extracted deterministically — payees resolve only against the verified vendor directory, never invented.",
+  },
+  {
+    label: "Payment Plan",
+    description:
+      "The treasury is checked and the payment is planned: the requested currency is settled into USDC at the configured FX rate, and the vault must hold enough to fund the payout.",
+  },
+  {
+    label: "Compliance Layer",
+    sub: ["Counterparty Screening", "Transaction Monitoring", "Compliance Risk", "Policy Engine", "Travel Rule"],
+    description:
+      "The DPT compliance layer screens the transfer deterministically — counterparty screening, transaction monitoring, a unified compliance risk score, the policy engine and the Travel Rule. The engines decide ALLOW / REVIEW / BLOCK; the LLM never does.",
+  },
+  {
+    label: "Route Optimization",
+    description:
+      "Multi-chain candidate routes are built and scored by a deterministic weighted model (gas, time, steps, risk). The lowest score wins — the AI does not choose the route, the math does.",
+  },
+  {
+    label: "Risk Decision",
+    description:
+      "Execution mechanics are evaluated (7 checks) and the compliance decision is set. HIGH risk is flagged for a human; BLOCK prevents execution entirely.",
+  },
+  {
+    label: "Human Approval",
+    description:
+      "Nothing executes automatically. The operator reviews recipient, amount, route, compliance decision and risk — and signs before anything moves.",
+  },
+  {
+    label: "Blockchain Execution",
+    description:
+      "The approved plan becomes a validated, nonce-protected SmartWallet payload. The contract receives validated parameters only and never trusts the LLM.",
+  },
+  {
+    label: "Audit",
+    description:
+      "Every stage is recorded with its source — AI-parsed intent, deterministic math, compliance decisions, human approval and on-chain events — as an immutable per-transaction record.",
+  },
+];
 
 function CheckPill({ status }: { status: "PASS" | "WARN" | "FAIL" }) {
   const cls =
@@ -66,6 +124,7 @@ export function DemoWalkthrough() {
   const [approved, setApproved] = useState(false);
   const [highRiskAck, setHighRiskAck] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [workflowActive, setWorkflowActive] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -98,7 +157,9 @@ export function DemoWalkthrough() {
   const riskLevel = data?.simulation.riskLevel ?? "LOW";
   const riskTone = RISK_TONE[riskLevel] ?? "emerald";
   const isHighRisk = riskLevel === "HIGH";
-  const approvalEnabled = !isHighRisk || highRiskAck;
+  const complianceDecision = data?.compliance.decision ?? "ALLOW";
+  const complianceBlocked = complianceDecision === "BLOCK";
+  const approvalEnabled = (!isHighRisk || highRiskAck) && !complianceBlocked;
 
   const toggle = (key: string) => setExpanded((p) => ({ ...p, [key]: !p[key] }));
 
@@ -132,7 +193,7 @@ export function DemoWalkthrough() {
     );
   }
 
-  const { intent, settlement, plan, optimization, recommendedRoute, simulation, executionPlan, audit } = data;
+  const { intent, settlement, plan, optimization, recommendedRoute, simulation, compliance, executionPlan, audit } = data;
   const explorerUrl = buildExplorerUrl(DEMO_CHAIN_ID, data.simulatedTxHash);
   return (
     <div className="space-y-8 pb-20">
@@ -150,8 +211,10 @@ export function DemoWalkthrough() {
           </h1>
           <p className="text-gray-400 text-sm md:text-base max-w-3xl leading-relaxed">
             One realistic business scenario, run through the exact deterministic engines the live product
-            uses. Watch PayMaster parse the intent, score the routes, evaluate risk, and prepare a
-            SmartWallet execution — with a human signature required before anything moves.
+            uses. Watch PayMaster parse the intent, run it through the DPT compliance layer (counterparty
+            screening, monitoring, compliance risk, policy, Travel Rule), optimize the route, evaluate
+            execution risk, then prepare a SmartWallet execution — with a human signature required before
+            anything moves.
           </p>
 
           <div className="p-4 rounded-2xl bg-black/30 border border-brand-500/30 flex items-start gap-3">
@@ -176,32 +239,77 @@ export function DemoWalkthrough() {
           <Route className="h-4 w-4 text-brand-cyan" />
           <h2 className="text-sm font-extrabold text-white">Primary workflow</h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-          {[
-            "Payment Instruction",
-            "AI Intent",
-            "Payment Plan",
-            "Route Optimization",
-            "Risk Evaluation",
-            "Human Approval",
-            "Blockchain Execution",
-            "Audit",
-          ].map((step, i) => (
-            <div key={step} className="flex items-center gap-1.5">
-              <div className="flex-1 rounded-xl bg-white/[0.03] border border-white/10 px-2.5 py-2 text-center">
-                <div className="text-[9px] font-bold text-brand-400">{String(i + 1).padStart(2, "0")}</div>
-                <div className="text-[10px] font-semibold text-gray-300 leading-tight mt-0.5">{step}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-2">
+          {WORKFLOW_STEPS.map((step, i) => {
+            const active = workflowActive === i;
+            return (
+              <div key={step.label} className="relative flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setWorkflowActive((cur) => (cur === i ? null : i))}
+                  className={cn(
+                    "flex-1 rounded-xl border px-3 py-2.5 text-center transition-all",
+                    step.sub
+                      ? active
+                        ? "bg-brand-500/25 border-brand-500/60 shadow-glow"
+                        : "bg-brand-500/10 border-brand-500/40 hover:bg-brand-500/20"
+                      : active
+                      ? "bg-brand-500/20 border-brand-500/50"
+                      : "bg-white/[0.03] border-white/10 hover:bg-white/[0.07]"
+                  )}
+                >
+                  <div className="text-[11px] font-bold text-brand-400">{String(i + 1).padStart(2, "0")}</div>
+                  <div className="mt-0.5 text-sm font-semibold text-gray-200 leading-tight">{step.label}</div>
+                  {step.sub && (
+                    <div className="mt-1.5 flex flex-wrap justify-center gap-1">
+                      {step.sub.map((s) => (
+                        <span
+                          key={s}
+                          className="px-1.5 py-0.5 rounded bg-brand-500/20 border border-brand-500/30 text-[9px] font-bold text-brand-300 leading-none"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-1.5 text-[10px] font-bold text-brand-400/80">
+                    {active ? "▲ close" : "▼ expand"}
+                  </div>
+                </button>
+
+                {i < WORKFLOW_STEPS.length - 1 && <ArrowRight className="h-3 w-3 text-gray-600 shrink-0 hidden lg:block" />}
               </div>
-              {i < 7 && <ArrowRight className="h-3 w-3 text-gray-600 shrink-0 hidden lg:block" />}
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        {/* Click-to-expand detail */}
+        {workflowActive !== null && (
+          <div className="mt-3 animate-fade-in rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-brand-400">{String(workflowActive + 1).padStart(2, "0")}</span>
+                  <span className="text-base font-extrabold text-white">{WORKFLOW_STEPS[workflowActive].label}</span>
+                </div>
+                <p className="mt-1.5 text-[13px] text-gray-300 leading-relaxed">{WORKFLOW_STEPS[workflowActive].description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWorkflowActive(null)}
+                className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold text-brand-400 hover:bg-white/5 hover:text-white"
+              >
+                ✕ close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ======================= 13 stages ======================= */}
+      {/* ======================= 14 stages ======================= */}
       <div className="space-y-4">
         {/* 1 — Instruction */}
-        <Stage n={1} title="Natural-language instruction" icon={<MessageSquareText className="h-4 w-4" />}>
+        <Stage n={1} title="Natural-language instruction" icon={<MessageSquareText className="h-4 w-4" />} sub={`“${data.instruction}”`}>
           <p className="text-sm text-gray-300">
             The operator types a payment instruction in plain English. No forms, no addresses to look up —
             the agent understands business language.
@@ -212,7 +320,7 @@ export function DemoWalkthrough() {
         </Stage>
 
         {/* 2 — Intent */}
-        <Stage n={2} title="AI intent extraction" icon={<BrainCircuit className="h-4 w-4" />}>
+        <Stage n={2} title="AI intent extraction" icon={<BrainCircuit className="h-4 w-4" />} sub={`${intent.action} · ${intent.recipientName ?? "—"} · ${currencySymbol(intent.currency)}${fmtNum(intent.amount ?? 0)} · INV-${intent.invoiceNumber ?? "—"} · ${(intent.confidence * 100).toFixed(0)}%`}>
           <p className="text-sm text-gray-300 mb-3">
             The agent converts the sentence into a structured, validated intent. Every field is checked —
             payees resolve only against the verified vendor directory, never invented.
@@ -220,7 +328,7 @@ export function DemoWalkthrough() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <Field label="Action" value={intent.action} />
             <Field label="Recipient" value={`${intent.recipientName ?? "—"}`} sub={intent.recipientAddress ? formatAddress(intent.recipientAddress) : "—"} />
-            <Field label="Amount" value={`${intent.amount} ${intent.currency}`} sub={currencySymbol(intent.currency)} />
+            <Field label="Amount" value={`${currencySymbol(intent.currency)}${fmtNum(intent.amount ?? 0)}`} sub={`≈ ${fmtNum(settlement.settlementAmount)} ${settlement.settlementAsset}`} />
             <Field label="Invoice" value={intent.invoiceNumber ? `INV-${intent.invoiceNumber}` : "—"} />
             <Field label="Due" value={intent.deadlineLabel ?? "—"} sub={intent.deadlineDate ? new Date(intent.deadlineDate).toLocaleDateString() : undefined} />
             <Field label="Confidence" value={`${(intent.confidence * 100).toFixed(0)}%`} />
@@ -240,14 +348,14 @@ export function DemoWalkthrough() {
         </Stage>
 
         {/* 3 — Treasury */}
-        <Stage n={3} title="Treasury check" icon={<Landmark className="h-4 w-4" />}>
+        <Stage n={3} title="Treasury check" icon={<Landmark className="h-4 w-4" />} sub={`${currencySymbol(intent.currency)}${fmtNum(intent.amount ?? 0)} → ${fmtNum(settlement.settlementAmount)} ${settlement.settlementAsset} @ FX ${fmtNum(settlement.fxRate)}`}>
           <p className="text-sm text-gray-300 mb-3">
-            The treasury vault is checked deterministically. RM is settled as USDC at the configured FX
-            rate — the treasury must hold enough to fund the payout.
+            The treasury vault is checked deterministically. The requested currency is settled as USDC at
+            the configured FX rate — the treasury must hold enough to fund the payout.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Field label="Requested" value={`${intent.amount} ${intent.currency}`} />
-            <Field label="FX rate" value={`${settlement.fxRate} ${intent.currency} / ${settlement.settlementAsset}`} />
+            <Field label="Requested" value={`${currencySymbol(intent.currency)}${fmtNum(intent.amount ?? 0)}`} />
+            <Field label="FX rate" value={`${fmtNum(settlement.fxRate)} ${currencySymbol(intent.currency)} → ${settlement.settlementAsset}`} />
             <Field label="Settlement" value={`${fmtNum(settlement.settlementAmount)} ${settlement.settlementAsset}`} />
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
@@ -260,8 +368,52 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 4 — Candidate routes */}
-        <Stage n={4} title="Candidate routes" icon={<Route className="h-4 w-4" />}>
+        {/* 4 — Compliance layer (merged: screening, monitoring, compliance risk, policy, travel rule) */}
+        <Stage n={4} title="Compliance layer" icon={<ShieldCheck className="h-4 w-4" />} sub={`${compliance.screening.verdict} · ${compliance.monitoring.signals.length === 0 ? "normal" : `${compliance.monitoring.signals.length} signal(s)`} · ${Math.round(compliance.risk.score)}/100 ${compliance.risk.level} · ${compliance.travelRule.status} · ${compliance.decision}`}>
+          <p className="text-sm text-gray-300 mb-4">
+            Before any route is chosen or money moves, the deterministic compliance layer screens the
+            transfer: counterparty screening, transaction monitoring, a unified compliance risk score, the
+            policy engine and the Travel Rule. The LLM never decides — the engines do.
+          </p>
+
+          {/* Full compliance pipe */}
+          <CompliancePipe assessment={compliance} />
+
+          {/* Five deterministic sub-workflows */}
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <CounterpartyPanel screening={compliance.screening} />
+            <MonitoringPanel monitoring={compliance.monitoring} />
+            <RiskSummaryPanel risk={compliance.risk} />
+            <div className="space-y-4">
+              <PolicyPanel policy={compliance.policy} />
+              <TravelRulePanel travelRule={compliance.travelRule} />
+            </div>
+          </div>
+
+          {/* Decision + reasons */}
+          <div className="mt-4 p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2">Why this decision</div>
+            <ul className="space-y-1.5">
+              {compliance.decisionReasons.map((r, i) => (
+                <li key={i} className="flex items-start gap-2 text-[12px] text-gray-300 leading-snug">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-brand-cyan shrink-0" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <ToneBadge tone={compliance.humanApprovalRequired ? "yellow" : "green"}>
+                {compliance.humanApprovalRequired ? "Human approval required" : "No review required"}
+              </ToneBadge>
+              <ToneBadge tone={compliance.executionAllowed ? "green" : "red"}>
+                {compliance.executionAllowed ? "Execution permitted" : "Execution prevented"}
+              </ToneBadge>
+            </div>
+          </div>
+        </Stage>
+
+        {/* 5 — Candidate routes (route optimization runs AFTER the compliance layer) */}
+        <Stage n={5} title="Candidate routes" icon={<Route className="h-4 w-4" />} sub={`${plan.routes.length} strategies · ${plan.routes.map((r) => r.chain).join(" · ")}`}>
           <p className="text-sm text-gray-300 mb-3">
             The planner builds viable multi-chain strategies. The LLM may propose strategy families, but the
             routes themselves are constructed deterministically.
@@ -287,8 +439,8 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 5 — Scoring */}
-        <Stage n={5} title="Mathematical route scoring" icon={<Calculator className="h-4 w-4" />}>
+        {/* 6 — Scoring */}
+        <Stage n={6} title="Mathematical route scoring" icon={<Calculator className="h-4 w-4" />} sub="Score(r) = 0.40·Gas + 0.20·Time + 0.15·Steps + 0.25·Risk (lower wins)">
           <p className="text-sm text-gray-300 mb-3">
             Every candidate is scored by a deterministic weighted model — the AI does not choose the route,
             the math does.
@@ -326,8 +478,8 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 6 — Recommended */}
-        <Stage n={6} title="Recommended route" icon={<CheckCircle2 className="h-4 w-4" />}>
+        {/* 7 — Recommended */}
+        <Stage n={7} title="Recommended route" icon={<CheckCircle2 className="h-4 w-4" />} sub={recommendedRoute ? `${recommendedRoute.name} · score ${(recommendedRoute.normalizedScore * 100).toFixed(1)}` : "No feasible route"}>
           {recommendedRoute ? (
             <div className="p-4 rounded-2xl bg-brand-500/10 border border-brand-500/40 space-y-3">
               <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -353,11 +505,12 @@ export function DemoWalkthrough() {
           )}
         </Stage>
 
-        {/* 7 — Risk */}
-        <Stage n={7} title="Risk assessment" icon={<ShieldAlert className="h-4 w-4" />}>
+        {/* 8 — Risk */}
+        <Stage n={8} title="Risk assessment" icon={<ShieldAlert className="h-4 w-4" />} sub={`${simulation.riskScore}/100 · ${riskLevel} · ${simulation.checks.length} deterministic checks`}>
           <p className="text-sm text-gray-300 mb-3">
-            Seven deterministic checks evaluate the payment before any approval. HIGH risk is never blocked —
-            it is flagged so a human decides.
+            Seven deterministic checks evaluate the execution mechanics of the payment. HIGH risk is never
+            blocked — it is flagged so a human decides. Regulatory &amp; treasury compliance is checked
+            separately by the compliance layer in stage 4.
           </p>
           <div className="flex items-center gap-4 mb-4 flex-wrap">
             <div className="text-3xl font-extrabold text-white tabular">{simulation.riskScore}<span className="text-sm text-gray-500 font-semibold">/100</span></div>
@@ -377,8 +530,8 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 8 — Simulation */}
-        <Stage n={8} title="Transaction simulation" icon={<FlaskConical className="h-4 w-4" />}>
+        {/* 9 — Simulation */}
+        <Stage n={9} title="Transaction simulation" icon={<FlaskConical className="h-4 w-4" />} sub={`${simulation.totals.transactionCount} tx · gas ${fmtUsd(simulation.totals.estimatedGasUsd)} · total ${fmtUsd(simulation.totals.estimatedTotalCostUsd)}`}>
           <p className="text-sm text-gray-300 mb-3">
             The payment is simulated before execution: expected result, gas, bridge fees, slippage and
             total cost — all deterministic.
@@ -395,8 +548,8 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 9 — Explanation */}
-        <Stage n={9} title="AI explanation" icon={<Sparkles className="h-4 w-4" />}>
+        {/* 10 — Explanation */}
+        <Stage n={10} title="AI explanation" icon={<Sparkles className="h-4 w-4" />} sub="Plain-English summary — only references validated data">
           <p className="text-sm text-gray-300 mb-3">
             The agent explains the payment in plain English — but it can only reference figures that already
             exist in the validated simulation. The AI explains verified data; it never invents numbers.
@@ -410,20 +563,26 @@ export function DemoWalkthrough() {
           </div>
         </Stage>
 
-        {/* 10 — Approval */}
-        <Stage n={10} title="Human approval" icon={<PenLine className="h-4 w-4" />}>
+        {/* 11 — Approval */}
+        <Stage n={11} title="Human approval" icon={<PenLine className="h-4 w-4" />} sub={`${complianceDecision} · ${complianceBlocked ? "approval disabled" : "signature required"}`}>
           <p className="text-sm text-gray-300 mb-3">
-            Nothing executes automatically. The operator reviews the recipient, amount, route and risk — and
-            signs. {isHighRisk && "This is a HIGH-risk payment, so an explicit acknowledgement is required."}
+            Nothing executes automatically. The operator reviews the recipient, amount, route, compliance
+            decision and risk — and signs. {isHighRisk && "This is a HIGH-risk payment, so an explicit acknowledgement is required."}
+            {complianceBlocked && " This transfer is BLOCKED by compliance policy — the approval path is disabled."}
           </p>
-          <div className="p-4 rounded-xl bg-black/25 border border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="p-4 rounded-xl bg-black/25 border border-white/10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
             <div><div className="text-[10px] text-gray-500 font-bold uppercase">To</div><div className="text-gray-200 font-semibold truncate">{formatAddress(intent.recipientAddress ?? "")}</div></div>
             <div><div className="text-[10px] text-gray-500 font-bold uppercase">Amount</div><div className="text-gray-200 font-semibold">{fmtNum(settlement.settlementAmount)} {settlement.settlementAsset}</div></div>
             <div><div className="text-[10px] text-gray-500 font-bold uppercase">Route</div><div className="text-gray-200 font-semibold">{recommendedRoute?.name ?? "—"}</div></div>
-            <div><div className="text-[10px] text-gray-500 font-bold uppercase">Risk</div><div className="text-gray-200 font-semibold">{simulation.riskScore}/100 · {riskLevel}</div></div>
+            <div><div className="text-[10px] text-gray-500 font-bold uppercase">Execution risk</div><div className="text-gray-200 font-semibold">{simulation.riskScore}/100 · {riskLevel}</div></div>
+            <div><div className="text-[10px] text-gray-500 font-bold uppercase">Compliance</div><div className="text-gray-200 font-semibold"><DecisionBadge decision={complianceDecision} /></div></div>
           </div>
 
-          {approved ? (
+          {complianceBlocked ? (
+            <div className="mt-4">
+              <Banner tone="error" title="Blocked by compliance" message="This transfer was BLOCKED by the deterministic compliance layer — the approval/execution path is disabled." />
+            </div>
+          ) : approved ? (
             <div className="mt-4 animate-fade-in">
               <Banner tone="success" title="Approved" message={`Approval recorded for ${fmtNum(settlement.settlementAmount)} ${settlement.settlementAsset} to ${intent.recipientName}.`} />
             </div>
@@ -453,8 +612,8 @@ export function DemoWalkthrough() {
           )}
         </Stage>
 
-        {/* 11 — SmartWallet execution */}
-        <Stage n={11} title="SmartWallet execution" icon={<WalletIcon className="h-4 w-4" />}>
+        {/* 12 — SmartWallet execution */}
+        <Stage n={12} title="SmartWallet execution" icon={<WalletIcon className="h-4 w-4" />} sub={`transferToken(${executionPlan.tokenAddress ? formatAddress(executionPlan.tokenAddress) : "native"}, ${executionPlan.amountWei} wei) · nonce-protected`}>
           <p className="text-sm text-gray-300 mb-3">
             The approved plan becomes a validated SmartWallet payload. Every mutative call is gated by an
             incrementing nonce (replay protection) and re-entrancy guard.
@@ -480,8 +639,8 @@ export function DemoWalkthrough() {
           </p>
         </Stage>
 
-        {/* 12 — Confirmation */}
-        <Stage n={12} title="Transaction confirmation" icon={<BadgeCheck className="h-4 w-4" />}>
+        {/* 13 — Confirmation */}
+        <Stage n={13} title="Transaction confirmation" icon={<BadgeCheck className="h-4 w-4" />} sub={approved ? "CONFIRMED (SIMULATED)" : "Awaiting approval (stage 11)"}>
           {approved ? (
             <div className="space-y-3 animate-fade-in">
               <Banner tone="success" title="Transaction confirmed" message="Status CONFIRMED (SIMULATED in this demo — no funds moved on-chain)." />
@@ -501,16 +660,16 @@ export function DemoWalkthrough() {
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              Awaiting the approval in stage 10 — confirmation is only shown once a human signs.
+              Awaiting the approval in stage 11 — confirmation is only shown once a human signs.
             </p>
           )}
         </Stage>
 
-        {/* 13 — Audit */}
-        <Stage n={13} title="Audit history" icon={<History className="h-4 w-4" />}>
+        {/* 14 — Audit */}
+        <Stage n={14} title="Audit history" icon={<History className="h-4 w-4" />} sub={`${auditCount} deterministic entries · AI / math / human / chain`}>
           <p className="text-sm text-gray-300 mb-3">
-            Every stage is recorded with its source: AI-parsed intent, deterministic math, human approval and
-            on-chain events. Fully auditable.
+            Every stage is recorded with its source: AI-parsed intent, deterministic math, compliance
+            decisions, human approval and on-chain events. Fully auditable.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -569,11 +728,13 @@ function Stage({
   n,
   title,
   icon,
+  sub,
   children,
 }: {
   n: number;
   title: string;
   icon: React.ReactNode;
+  sub?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(true);
@@ -588,7 +749,10 @@ function Stage({
         </div>
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="text-brand-400">{icon}</span>
-          <span className="text-sm font-extrabold text-white">{title}</span>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-extrabold text-white leading-tight">{title}</div>
+            {sub && <div className="mt-0.5 truncate text-[11px] text-gray-500 leading-tight">{sub}</div>}
+          </div>
         </div>
         <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>

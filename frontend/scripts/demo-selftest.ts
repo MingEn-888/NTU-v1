@@ -2,11 +2,12 @@
 // PayMaster Phase 12 — Product Demo pipeline self-test
 // Exercises the demo engine end-to-end (no wallet / no key / no network):
 //   - parses the Alice INV-1024 scenario into a structured intent
-//   - settlement FX (RM -> USDC)
+//   - settlement FX ($ -> USDC)
 //   - deterministic route scoring + recommendation
 //   - risk simulation (7 checks, level, totals, explanation)
+//   - compliance layer (screening / monitoring / risk / policy / travel rule / decision)
 //   - SmartWallet execution payload (transferToken / wei amounts)
-//   - 13-stage audit trail
+//   - 14-stage audit trail
 //   - determinism (identical input -> identical output)
 //
 //   cd frontend && npx tsx scripts/demo-selftest.ts   (run AFTER tsc --noEmit)
@@ -42,7 +43,7 @@ async function main() {
   // --- Full pipeline ---------------------------------------------------------
   console.log("\nrunDemoPipeline:");
   const result = await runDemoPipeline({});
-  const { intent, settlement, plan, optimization, simulation, executionPlan, audit } = result;
+  const { intent, settlement, plan, optimization, simulation, compliance, executionPlan, audit } = result;
 
   check("intent detected", intent.detected === true);
   check("recipient is Alice", intent.recipientName?.toLowerCase().includes("alice") === true);
@@ -51,14 +52,14 @@ async function main() {
     intent.recipientAddress === "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
   );
   check("amount is 2500", intent.amount === 2500);
-  check("currency is RM", intent.currency === "RM");
+  check("currency is $", intent.currency === "$");
   check("invoice normalized to 1024", intent.invoiceNumber === "1024");
   check("deadline is Friday", intent.deadlineLabel?.toLowerCase().includes("friday") === true);
   check("no missing information", intent.missingInformation.length === 0);
 
   check("settlement asset USDC", settlement.settlementAsset === "USDC");
-  check("settlement amount ~568.18", Math.abs(settlement.settlementAmount - 2500 / 4.4) < 0.01);
-  check("fx rate 4.4", settlement.fxRate === 4.4);
+  check("settlement amount 2500 USDC", settlement.settlementAmount === 2500);
+  check("fx rate 1", settlement.fxRate === 1);
 
   check("plan has routes", plan.routes.length >= 2);
   check("plan has steps", plan.steps.length >= 1);
@@ -88,11 +89,25 @@ async function main() {
   const hasTransfer = executionPlan.steps.some((s) => s.tx && s.tx.kind === "transferToken");
   check("has a transferToken step", hasTransfer);
 
-  check("audit has 13 stages", audit.length === 13);
+  check("audit has 14 stages", audit.length === 14);
   check("audit stages match demo stages", audit.map((e) => e.stage).join(",") === DEMO_STAGES.map((s) => s.n).join(","));
   check("audit includes approval entry", audit.some((e) => e.label.toLowerCase().includes("approval")));
   check("audit includes execution entry", audit.some((e) => e.label.toLowerCase().includes("smartwallet")));
   check("audit includes confirmation", audit.some((e) => e.label.toLowerCase().includes("confirmed")));
+
+  // --- Compliance layer (stage 4, merged) -----------------------------------
+  console.log("\ncompliance layer:");
+  check("compliance decision is valid", ["ALLOW", "REVIEW", "BLOCK"].includes(compliance.decision));
+  check("Alice (verified vendor) is ALLOWED", compliance.decision === "ALLOW");
+  check("counterparty verdict is PASS", compliance.screening.verdict === "PASS");
+  check("counterparty screened as Acme Suppliers", compliance.screening.profile.name?.includes("Acme") === true);
+  check("compliance risk score in 0-100", compliance.risk.score >= 0 && compliance.risk.score <= 100);
+  check("compliance risk level valid", ["LOW", "MEDIUM", "HIGH", "CRITICAL"].includes(compliance.risk.level));
+  check("compliance execution allowed", compliance.executionAllowed === true);
+  check("compliance human approval not forced", compliance.humanApprovalRequired === false);
+  const complianceAudit = audit.find((e) => e.stage === 4);
+  check("audit has a compliance layer entry", !!complianceAudit && complianceAudit.label.toLowerCase().includes("compliance layer"));
+  check("compliance layer entry includes decision", !!complianceAudit && complianceAudit.detail.includes(compliance.decision));
 
   // --- Determinism -----------------------------------------------------------
   console.log("\ndeterminism:");
