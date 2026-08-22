@@ -75,6 +75,18 @@ export function PaymentCommandCenter() {
   const currentIdx = stageIndex(stage);
   const isExecuting = stage === "executing";
 
+  // Expand the conversation box as an operation progresses — compact when idle,
+  // larger once an intent is detected, and largest once a plan is generated /
+  // being approved so the plan + compliance + risk panels have room to breathe
+  // without manual scrolling. Height animates smoothly via the CSS transition
+  // below.
+  const chatHeightClass =
+    stage === "natural_language"
+      ? "h-[560px] md:h-[600px]"
+      : stage === "payment_request"
+      ? "h-[660px] md:h-[700px]"
+      : "h-[820px] md:h-[860px]";
+
   const handleWalletToggle = async () => {
     try {
       if (wallet.isConnected) {
@@ -210,7 +222,12 @@ export function PaymentCommandCenter() {
             </div>
             <span className="text-[10px] font-semibold text-gray-500">Source: CHAT</span>
           </div>
-          <div className="h-[560px] md:h-[600px] p-4 md:p-5 flex flex-col">
+          {/* Inline transition beats the global `.theme-transition *` rule
+              (unlayered) which otherwise overrides `transition-[height]`. */}
+          <div
+            className={`${chatHeightClass} p-4 md:p-5 flex flex-col`}
+            style={{ transition: "height 500ms cubic-bezier(0.4, 0, 0.2, 1)" }}
+          >
             <ChatWindow
               businessId={businessId}
               businessName={treasury.businessProfile?.business_name}

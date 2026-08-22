@@ -16,10 +16,11 @@ import type { SimulationTreasuryLike } from "@/lib/risk/adapter";
 import { simulate } from "@/lib/risk/simulate";
 import { buildExecutionPlan } from "@/lib/execution/execution";
 import { getSmartWalletDeployment } from "@/lib/execution/abi";
+import { runCompliancePipeline } from "@/lib/compliance/orchestrator";
 import type { DemoPipelineResult, DemoAuditEntry } from "./types";
 
 /** The one realistic business scenario used throughout the demo. */
-export const DEFAULT_DEMO_INSTRUCTION = "Pay Alice RM2,500 for invoice INV-1024 by Friday.";
+export const DEFAULT_DEMO_INSTRUCTION = "Pay Alice $2,500 for invoice INV-1024 by Friday.";
 
 /** Demo SmartWallet execution chain (localhost Hardhat deployment). */
 export const DEMO_CHAIN_ID = 31337;
@@ -53,10 +54,27 @@ export async function runDemoPipeline(opts: {
     throw new Error("Demo instruction could not be parsed into a payment intent.");
   }
 
-  // 3-4. Treasury-aware plan + candidate routes (Phase 4/6 deterministic).
+  // 3. Treasury-aware plan (Phase 4/6 deterministic).
   const plan = generatePaymentPlan(intent);
   const settlement = computeSettlement(intent);
 
+  // 4. Compliance layer (deterministic) — screens the recipient, monitors the
+  //    transaction, scores regulatory risk, evaluates treasury/compliance
+  //    policies and checks the Travel Rule BEFORE route selection. Uses the
+  //    same engines as the live product (`/api/compliance/assess`).
+  const compliance = runCompliancePipeline({
+    intent: instruction,
+    recipient: intent.recipientName,
+    recipientAddress: intent.recipientAddress ?? "",
+    asset: settlement.settlementAsset,
+    amountUsd: Math.round(settlement.settlementAmount * 100) / 100,
+    network: (plan.routes.find((r) => r.isRecommended)?.chain ?? "polygon").toLowerCase(),
+    customerId: "cust_techcorp",
+    txnReference: "TX-DEMO-1024",
+  });
+
+  // 5-7. Deterministic weighted route scoring (Phase 7) — runs AFTER the
+  //      compliance layer.
   const candidateRoutes: CandidateRoute[] = plan.routes.map((r) => ({
     routeId: r.id,
     name: r.routeName,
@@ -77,7 +95,6 @@ export async function runDemoPipeline(opts: {
     availableAssets: treasury?.availableAssets,
   };
 
-  // 5-6. Deterministic weighted route scoring (Phase 7).
   const optimization = optimizeRoutes({
     routes: candidateRoutes,
     weights: { gas: 0.4, time: 0.2, steps: 0.15, risk: 0.25 },
@@ -87,11 +104,11 @@ export async function runDemoPipeline(opts: {
   const recommendedRoute =
     optimization.routes.find((r) => r.isRecommended) ?? optimization.routes[0] ?? null;
 
-  // 7-9. Risk evaluation + simulation + explanation (Phase 8).
+  // 8-10. Risk evaluation + simulation + explanation (Phase 8).
   const simulationRequest = simulationRequestFromPlan(intent, plan, treasury);
   const simulation = await simulate(simulationRequest);
 
-  // 11. Validated SmartWallet payload (Phase 10).
+  // 12. Validated SmartWallet payload (Phase 10).
   const deployment = getSmartWalletDeployment(DEMO_CHAIN_ID);
   const smartWalletAddress = deployment?.smartWallet ?? "0x0000000000000000000000000000000000000000";
   const executionPlan = buildExecutionPlan({
@@ -121,6 +138,7 @@ export async function runDemoPipeline(opts: {
         }
       : null,
     simulation,
+    compliance,
     smartWalletAddress,
     simulatedTxHash,
   });
@@ -133,6 +151,7 @@ export async function runDemoPipeline(opts: {
     optimization,
     recommendedRoute,
     simulation,
+    compliance,
     executionPlan,
     audit,
     chainId: DEMO_CHAIN_ID,
@@ -143,7 +162,7 @@ export async function runDemoPipeline(opts: {
 }
 
 // -----------------------------------------------------------------------------
-// Audit trail — deterministic entries for every stage (stage 13).
+// Audit trail — deterministic entries for every stage (stage 14).
 // -----------------------------------------------------------------------------
 
 function buildDemoAudit(o: {
@@ -153,10 +172,11 @@ function buildDemoAudit(o: {
   optimization: ReturnType<typeof optimizeRoutes>;
   recommendedRoute: { routeId: string; name: string; normalizedScore: number } | null;
   simulation: Awaited<ReturnType<typeof simulate>>;
+  compliance: ReturnType<typeof runCompliancePipeline>;
   smartWalletAddress: string;
   simulatedTxHash: string;
 }): DemoAuditEntry[] {
-  const { intent, settlement, optimization, recommendedRoute, simulation, smartWalletAddress, simulatedTxHash } = o;
+  const { intent, settlement, optimization, recommendedRoute, simulation, compliance, smartWalletAddress, simulatedTxHash } = o;
   const entries: DemoAuditEntry[] = [];
 
   const push = (stage: number, label: string, detail: string, source: DemoAuditEntry["source"]) => {
@@ -182,36 +202,42 @@ function buildDemoAudit(o: {
     `${settlement.settlementAmount} ${settlement.settlementAsset} required at FX ${settlement.fxRate} ${intent.currency}/${settlement.settlementAsset}`,
     "deterministic"
   );
-  push(4, "Candidate routes generated", `${optimization.routes.length} strategies evaluated`, "deterministic");
   push(
-    5,
+    4,
+    "Compliance layer",
+    `Counterparty ${compliance.screening.verdict} (${compliance.screening.riskScore}/100) · monitoring ${compliance.monitoring.signals.length === 0 ? "normal" : `${compliance.monitoring.signals.length} signal(s)`} · compliance risk ${compliance.risk.score}/100 ${compliance.risk.level} · policies ${compliance.policy.violations.length === 0 ? "pass" : `${compliance.policy.violations.length} violation(s)`} · travel rule ${compliance.travelRule.status} · decision ${compliance.decision}`,
+    "deterministic"
+  );
+  push(5, "Candidate routes generated", `${optimization.routes.length} strategies evaluated`, "deterministic");
+  push(
+    6,
     "Routes scored",
     `Weighted model gas 0.40 · time 0.20 · steps 0.15 · risk 0.25 (lower is better)`,
     "deterministic"
   );
   push(
-    6,
+    7,
     "Recommended route",
     recommendedRoute ? `${recommendedRoute.name} — score ${(recommendedRoute.normalizedScore * 100).toFixed(1)}` : "None",
     "deterministic"
   );
   push(
-    7,
+    8,
     "Risk assessed",
     `${simulation.riskScore}/100 · ${simulation.riskLevel} · ${simulation.checks.length} checks (${simulation.checks.filter((c) => c.status !== "PASS").length} non-pass)`,
     "deterministic"
   );
   push(
-    8,
+    9,
     "Transaction simulated",
     `${simulation.totals.transactionCount} tx · gas $${simulation.totals.estimatedGasUsd.toFixed(2)} · total $${simulation.totals.estimatedTotalCostUsd.toFixed(2)}`,
     "deterministic"
   );
-  push(9, "Explanation generated", "Grounded only in validated simulation data", "ai");
-  push(10, "Human approval", "Pending — user signature required", "human");
-  push(11, "SmartWallet payload built", `Nonce-protected transfer via ${smartWalletAddress}`, "chain");
-  push(12, "Transaction confirmed", `${simulatedTxHash} (SIMULATED — no funds moved in demo)`, "chain");
-  push(13, "Audit trail recorded", `${entries.length} deterministic entries`, "deterministic");
+  push(10, "Explanation generated", "Grounded only in validated simulation data", "ai");
+  push(11, "Human approval", "Pending — user signature required", "human");
+  push(12, "SmartWallet payload built", `Nonce-protected transfer via ${smartWalletAddress}`, "chain");
+  push(13, "Transaction confirmed", `${simulatedTxHash} (SIMULATED — no funds moved in demo)`, "chain");
+  push(14, "Audit trail recorded", `${entries.length} deterministic entries`, "deterministic");
 
   return entries;
 }

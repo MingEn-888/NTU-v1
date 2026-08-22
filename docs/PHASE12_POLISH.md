@@ -96,40 +96,48 @@ hard trust boundary holds in code:
 ## 5. Demo data & product demo
 
 A new `/demo` page drives the **real deterministic engines** (no mock numbers)
-through the single scenario **"Pay Alice RM2,500 for invoice INV-1024 by Friday."**
+through the single scenario **"Pay Alice $2,500 for invoice INV-1024 by Friday."**
 
 Demo data sources: `VENDOR_DIRECTORY` (Alice Tan → `0x71C7…976F`), `CURRENCY_CONFIG`
-(RM→USDC @ 4.4 → 568.18 USDC), Phase 4 `generatePaymentPlan` (3 candidate
-routes), Phase 7 `optimizeRoutes` (weighted scores), Phase 8 `simulate` (7 checks,
-risk level, gas/cost/slippage, expected result + explanation), Phase 10
-`buildExecutionPlan` (SmartWallet `transferToken` payload in wei), plus a
-deterministic 13-entry audit trail. The only simulated values are the final on-chain
-tx hash (`0xDEMO…`) and the human signature — both clearly labelled SIMULATED.
+($ → USDC @ 1 → 2,500 USDC), Phase 4 `generatePaymentPlan` (3 candidate
+routes), the compliance layer (counterparty screening, monitoring, compliance
+risk, policy, Travel Rule, decision), Phase 7 `optimizeRoutes` (weighted scores
+— runs AFTER the compliance layer), Phase 8 `simulate` (7 checks, risk level,
+gas/cost/slippage, expected result + explanation), Phase 10 `buildExecutionPlan`
+(SmartWallet `transferToken` payload in wei), and a deterministic 14-entry audit
+trail. The only simulated values are the final on-chain tx hash (`0xDEMO…`) and
+the human signature — both clearly labelled SIMULATED.
 
 New files:
 
 - `frontend/src/lib/demo/{types,engine}.ts` — demo pipeline (runs real engines)
-- `frontend/src/components/demo/DemoWalkthrough.tsx` — the 13-stage UI
+- `frontend/src/components/demo/DemoWalkthrough.tsx` — the 14-stage UI
 - `frontend/src/app/demo/page.tsx` — `/demo` route
 - `frontend/comps/demo/index.ts` — shim
-- `frontend/scripts/demo-selftest.ts` — **47 assertions, all passing**
+- `frontend/scripts/demo-selftest.ts` — **57 assertions, all passing**
 
-### Demo walkthrough (13 stages)
+### Demo walkthrough (14 stages)
 
 1. **Natural-language instruction** — the exact operator sentence.
-2. **AI intent extraction** — recipient Alice Tan / address, RM 2,500, invoice,
+2. **AI intent extraction** — recipient Alice Tan / address, $2,500, invoice,
    due Friday, 98% deterministic confidence, no missing info.
-3. **Treasury check** — RM → USDC @ 4.4 → 568.18 USDC, treasury holds USDC.
-4. **Candidate routes** — 3 strategies (Polygon direct, Arbitrum fast, Ethereum bridge).
-5. **Mathematical route scoring** — `Score = 0.40·Gas + 0.20·Time + 0.15·Steps + 0.25·Risk`, factor table.
-6. **Recommended route** — lowest score wins, with recommendation reason + savings.
-7. **Risk assessment** — 7 checks, score /100, LOW·MEDIUM·HIGH, warnings.
-8. **Simulation** — tx count, gas, bridge fee, slippage, total cost, expected result.
-9. **AI explanation** — plain-English explanation grounded only in validated data.
-10. **Human approval** — interactive gate; HIGH risk requires acknowledgement; "Approve & sign (simulated)".
-11. **SmartWallet execution** — validated nonce-protected `transferToken` payload.
-12. **Transaction confirmation** — SIMULATED hash + explorer link, revealed only after approval.
-13. **Audit history** — 13 deterministic entries tagged by source (AI / deterministic / human / chain).
+3. **Treasury check** — $ → USDC @ 1 → 2,500 USDC, treasury holds USDC.
+4. **Compliance layer** (ONE merged stage) — compliance pipe + five deterministic
+   sub-workflows: counterparty screening (Acme = verified → PASS), transaction
+   monitoring (normal), compliance risk score (unified 0-100 regulatory risk),
+   policy engine (ALLOW, 11/11 pass), Travel Rule (READY), + decision reasons
+   and approval/execution gating. Runs BEFORE route selection; the LLM never decides.
+5. **Candidate routes** — 3 strategies (Polygon direct, Arbitrum fast, Ethereum bridge).
+6. **Mathematical route scoring** — `Score = 0.40·Gas + 0.20·Time + 0.15·Steps + 0.25·Risk`, factor table.
+7. **Recommended route** — lowest score wins, with recommendation reason + savings.
+8. **Risk assessment** — 7 execution-mechanics checks, score /100, LOW·MEDIUM·HIGH, warnings.
+9. **Simulation** — tx count, gas, bridge fee, slippage, total cost, expected result.
+10. **AI explanation** — plain-English explanation grounded only in validated data.
+11. **Human approval** — interactive gate; HIGH risk requires acknowledgement; compliance
+    BLOCK disables the approval path; "Approve & sign (simulated)".
+12. **SmartWallet execution** — validated nonce-protected `transferToken` payload.
+13. **Transaction confirmation** — SIMULATED hash + explorer link, revealed only after approval.
+14. **Audit history** — 14 deterministic entries tagged by source (AI / deterministic / human / chain).
 
 ## 6. Final architecture summary
 
