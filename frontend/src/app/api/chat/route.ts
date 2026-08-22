@@ -60,6 +60,7 @@ async function fetchTreasuryUsd(businessId: string): Promise<number | undefined>
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const businessId = searchParams.get("businessId");
+  const conversationId = searchParams.get("conversationId");
   const limit = Math.min(parseInt(searchParams.get("limit") || "200", 10), 500);
 
   if (!businessId) {
@@ -74,10 +75,13 @@ export async function GET(req: NextRequest) {
 
   const supabaseAdmin = getSupabaseAdmin();
   try {
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from("conversation_messages")
       .select("*")
-      .eq("business_id", businessId)
+      .eq("business_id", businessId);
+    // Optional thread filter — fetch one conversation instead of the whole stream.
+    if (conversationId) query = query.eq("conversation_id", conversationId);
+    const { data, error } = await query
       .order("created_at", { ascending: true })
       .limit(limit);
 
@@ -148,7 +152,11 @@ export async function POST(req: NextRequest) {
 
   const supabaseAdmin = getSupabaseAdmin();
   try {
-    const { businessId, message } = await req.json();
+    const { businessId, message, conversationId } = await req.json();
+    const convId =
+      typeof conversationId === "string" && conversationId.trim()
+        ? conversationId.trim()
+        : null;
 
     if (!businessId || !message || typeof message !== "string") {
       return NextResponse.json(
@@ -179,7 +187,13 @@ export async function POST(req: NextRequest) {
     // 2. Persist the user's message.
     const { data: userMsg, error: userErr } = await supabaseAdmin
       .from("conversation_messages")
-      .insert({ business_id: businessId, role: "user", content: trimmed, status: "COMPLETED" })
+      .insert({
+        business_id: businessId,
+        role: "user",
+        content: trimmed,
+        status: "COMPLETED",
+        ...(convId ? { conversation_id: convId } : {}),
+      })
       .select()
       .single();
     if (userErr) {
@@ -203,6 +217,7 @@ export async function POST(req: NextRequest) {
           role: "agent",
           content,
           status: "COMPLETED",
+          ...(convId ? { conversation_id: convId } : {}),
         })
         .select()
         .single();
@@ -274,6 +289,7 @@ export async function POST(req: NextRequest) {
           plan: null,
           entity_ids: entityIds,
           status: "COMPLETED",
+          ...(convId ? { conversation_id: convId } : {}),
         })
         .select()
         .single();

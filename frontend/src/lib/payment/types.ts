@@ -103,6 +103,19 @@ export interface ChatMessage {
   error?: string | null;
 }
 
+/** A browsable past-conversation entry in the assistant history panel. */
+export interface ConversationSummary {
+  conversationId: string;
+  /** First user message (truncated) — human-readable label. */
+  title: string;
+  messageCount: number;
+  /** Number of parsed payment intents inside this conversation. */
+  paymentCount: number;
+  startedAt: string;
+  lastMessageAt: string;
+  lastPreview: string;
+}
+
 /** Shape returned by POST /api/chat. */
 export interface ChatSendResponse {
   success: boolean;
