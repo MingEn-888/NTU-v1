@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Landmark, Wallet, MessageSquareText, Inbox } from "lucide-react";
-import type { ChatMessage as ChatMessageModel, OperationStage, PaymentPlan } from "@/lib/payment/types";
+import { Landmark, Wallet, MessageSquareText, Inbox, History, Plus, Clock } from "lucide-react";
+import type {
+  ChatMessage as ChatMessageModel,
+  ConversationSummary,
+  OperationStage,
+  PaymentPlan,
+} from "@/lib/payment/types";
 import { ChatMessage, type ExecutionResult } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { buildExplorerUrl } from "@/lib/payment/execution";
@@ -81,6 +86,12 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [sending, setSending] = useState(false);
+  // Conversation history — each visit starts a fresh thread and past
+  // conversations are browsable instead of being auto-restored.
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [loadingConversations, setLoadingConversations] = useState(false);
   const [generatingPlanMsgId, setGeneratingPlanMsgId] = useState<string | null>(null);
   const [executingMsgId, setExecutingMsgId] = useState<string | null>(null);
   const [executionResults, setExecutionResults] = useState<Record<string, ExecutionResult>>({});
@@ -165,32 +176,66 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
     };
   }, []);
 
-  // --- Load conversation history ----------------------------------------------
-  const loadHistory = useCallback(async (bizId: string) => {
-    setLoadingHistory(true);
+  // --- Past conversation index (browsable, never auto-restored) ----------------
+  const loadConversations = useCallback(async (bizId: string) => {
+    setLoadingConversations(true);
     try {
-      const data = await apiJson(`/api/chat?businessId=${encodeURIComponent(bizId)}`);
-      // Don't clobber an in-flight conversation: if the operator has already
-      // sent a message (e.g. a deep-linked prompt that resolved before this
-      // history request), keep the live messages instead of the empty store.
-      setMessages((prev) => (prev.length > 0 ? prev : data.messages || []));
-      // Reflect the latest persisted operation stage if a plan already exists.
-      const lastAgent = (data.messages || []).filter((m: ChatMessageModel) => m.role === "agent").pop();
-      if (lastAgent?.plan) onOperationStageChange?.("payment_plan");
-      else if (lastAgent?.intent) onOperationStageChange?.("payment_request");
+      const data = await apiJson(`/api/chat/history?businessId=${encodeURIComponent(bizId)}`);
+      setConversations(data.conversations || []);
     } catch (err: any) {
-      console.error("Failed to load chat history:", err);
-      setNotice("Could not load conversation history from the treasury store.");
-      setOfflineMode(true);
+      console.warn("Failed to load conversation history:", err);
     } finally {
-      setLoadingHistory(false);
+      setLoadingConversations(false);
     }
-  }, [onOperationStageChange]);
+  }, []);
 
   useEffect(() => {
     if (!businessId) return;
-    loadHistory(businessId);
-  }, [businessId, loadHistory]);
+    loadConversations(businessId);
+  }, [businessId, loadConversations]);
+
+  /** Open a past conversation by id. */
+  const openConversation = useCallback(
+    async (convId: string) => {
+      if (!businessId || sending || !convId || convId === conversationId) return;
+      setHistoryOpen(false);
+      setLoadingHistory(true);
+      setNotice(null);
+      try {
+        const data = await apiJson(
+          `/api/chat?businessId=${encodeURIComponent(businessId)}&conversationId=${encodeURIComponent(convId)}`
+        );
+        setMessages(data.messages || []);
+        setConversationId(convId);
+        const lastAgent = (data.messages || [])
+          .filter((m: ChatMessageModel) => m.role === "agent")
+          .pop();
+        if (lastAgent?.plan) onOperationStageChange?.("payment_plan");
+        else if (lastAgent?.intent) onOperationStageChange?.("payment_request");
+        else onOperationStageChange?.("natural_language");
+      } catch (err: any) {
+        console.error("Failed to open conversation:", err);
+        setNotice("Could not open that conversation from the treasury store.");
+      } finally {
+        setLoadingHistory(false);
+      }
+    },
+    [businessId, sending, conversationId, onOperationStageChange]
+  );
+
+  /** Start a brand-new conversation (no auto-restore of the previous one). */
+  const startNewConversation = useCallback(() => {
+    if (sending) return;
+    setMessages([]);
+    setConversationId(null);
+    setHistoryOpen(false);
+    setExecutionResults({});
+    setExecutionPlans({});
+    setGeneratingPlanMsgId(null);
+    setExecutingMsgId(null);
+    setNotice(null);
+    onOperationStageChange?.("natural_language");
+  }, [sending, onOperationStageChange]);
 
   // --- Streaming simulation ---------------------------------------------------
   const startStreaming = useCallback((id: string, fullContent: string) => {
@@ -279,6 +324,10 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
   const handleSend = useCallback(
     async (text: string) => {
       if (!businessId || sending) return;
+      // First message of a fresh conversation -> mint a new thread id so the
+      // persisted rows land in their own history entry.
+      const convId = conversationId ?? newConversationId();
+      if (!conversationId) setConversationId(convId);
       const userMsg: ChatMessageModel = {
         id: `local-user-${Date.now()}`,
         role: "user",
@@ -300,7 +349,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
       try {
         const data = await apiJson("/api/chat", {
           method: "POST",
-          body: JSON.stringify({ businessId, message: text }),
+          body: JSON.stringify({ businessId, message: text, conversationId: convId }),
         });
         const agent = data.message as ChatMessageModel;
         // Placeholder agent message with streaming status.
@@ -324,9 +373,11 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
         localProcessMessage(text);
       } finally {
         setSending(false);
+        // Refresh the history index so this thread shows up / stays current.
+        loadConversations(businessId);
       }
     },
-    [businessId, sending, startStreaming, onOperationStageChange, offlineMode, localProcessMessage, markOffline]
+    [businessId, sending, conversationId, startStreaming, onOperationStageChange, offlineMode, localProcessMessage, markOffline, loadConversations]
   );
 
   // --- Phase 11 deep-link: auto-send the dashboard instruction once -----------
@@ -631,6 +682,98 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
 
   return (
     <div className="flex flex-col h-full">
+      {/* Conversation controls — history browser instead of auto-restore */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <button
+          onClick={startNewConversation}
+          disabled={sending}
+          title="Start a new conversation"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-brand-cyan bg-brand-500/10 border border-brand-500/25 hover:bg-brand-500/20 transition-colors disabled:opacity-50"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New conversation
+        </button>
+        <button
+          onClick={() => setHistoryOpen((o) => !o)}
+          disabled={sending}
+          aria-expanded={historyOpen}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors disabled:opacity-50 ${
+            historyOpen
+              ? "bg-brand-500/20 text-brand-100 border border-brand-500/40"
+              : "text-gray-400 bg-white/5 border border-white/10 hover:bg-white/10"
+          }`}
+        >
+          <History className="h-3.5 w-3.5" />
+          History
+          {conversations.length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[9px] text-gray-300">
+              {conversations.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* History panel */}
+      {historyOpen && (
+        <div className="mb-3 rounded-xl border border-white/10 bg-black/20 max-h-56 overflow-y-auto">
+          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-gray-500 border-b border-white/10 flex items-center justify-between">
+            <span>Past conversations</span>
+            <span className="font-normal normal-case text-gray-600">
+              {conversations.length} saved
+            </span>
+          </div>
+          {loadingConversations ? (
+            <div className="flex items-center gap-2 px-4 py-6 justify-center text-gray-500 text-xs">
+              <span className="h-3.5 w-3.5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
+              Loading history…
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="px-4 py-6 text-center text-xs text-gray-500">
+              No past conversations yet. Your sessions appear here once you send a
+              message.
+            </div>
+          ) : (
+            <ul className="divide-y divide-white/5">
+              {conversations.map((c) => (
+                <li key={c.conversationId}>
+                  <button
+                    onClick={() => openConversation(c.conversationId)}
+                    className={`w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors ${
+                      c.conversationId === conversationId ? "bg-brand-500/10" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] font-semibold text-gray-200 truncate flex-1">
+                        {c.title}
+                      </span>
+                      {c.conversationId === conversationId && (
+                        <span className="text-[9px] font-bold text-brand-cyan shrink-0">
+                          OPEN
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-500">
+                      <span>
+                        {c.messageCount} msg{c.messageCount === 1 ? "" : "s"}
+                      </span>
+                      {c.paymentCount > 0 && (
+                        <span>
+                          · {c.paymentCount} payment{c.paymentCount === 1 ? "" : "s"}
+                        </span>
+                      )}
+                      <span className="ml-auto shrink-0">
+                        <Clock className="h-2.5 w-2.5 inline mr-0.5" />
+                        {relativeTime(c.lastMessageAt)}
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {/* Conversation scroll area */}
       <div
         ref={scrollRef}
@@ -640,7 +783,7 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
           {loadingHistory && (
             <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
               <span className="h-5 w-5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
-              <span className="text-sm">Restoring conversation…</span>
+              <span className="text-sm">Loading conversation…</span>
             </div>
           )}
 
@@ -690,6 +833,28 @@ export function ChatWindow({ businessId, businessName, wallet, onOperationStageC
       </div>
     </div>
   );
+}
+
+/** Mint a unique conversation/thread id (browser crypto with a safe fallback). */
+function newConversationId(): string {
+  return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `conv-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/** Compact relative timestamp for the history list. */
+function relativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (!isFinite(then)) return "recently";
+  const diff = Date.now() - then;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
 }
 
 function EmptyState({ businessName }: { businessName?: string }) {
